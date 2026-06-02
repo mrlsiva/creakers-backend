@@ -21,11 +21,18 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ForceDeleteAction;
+use Filament\Tables\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Actions\RestoreAction;
+use Filament\Tables\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class ProductResource extends Resource
@@ -73,73 +80,79 @@ class ProductResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->columns(4)->schema([
-            // Row 1: Category | Name | Per | Is Active
-            Select::make('category_id')
-                ->label('Category')
-                ->relationship('category', 'name')
-                ->required()
-                ->searchable()
-                ->preload(),
+            // Row 1: Category | Name | Per  — 3 equal columns, full width
+            Grid::make(3)
+                ->schema([
+                    Select::make('category_id')
+                        ->label('Category')
+                        ->relationship('category', 'name')
+                        ->required()
+                        ->searchable()
+                        ->preload(),
 
-            TextInput::make('name')
-                ->required()
-                ->maxLength(255)
-                ->live()
-                ->afterStateUpdated(function ($state, callable $set, $record) {
-                    if (!$record) {
-                        $set('slug', Str::slug($state));
-                    }
-                }),
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255)
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set, $record) {
+                            if (!$record) {
+                                $set('slug', Str::slug($state));
+                            }
+                        }),
 
-            Select::make('per')
-                ->label('Per')
-                ->options(fn() => Product::whereNotNull('per')
-                    ->where('per', '!=', '')
-                    ->orderBy('per')
-                    ->distinct()
-                    ->pluck('per', 'per')
-                )
-                ->searchable()
-                ->createOptionForm([
-                    TextInput::make('per')
-                        ->label('New Per Value')
-                        ->placeholder('e.g. 1 Pkt, 1 Bag, 100 Pcs')
-                        ->required(),
+                    Select::make('per')
+                        ->label('Per')
+                        ->options(fn() => Product::whereNotNull('per')
+                            ->where('per', '!=', '')
+                            ->orderBy('per')
+                            ->distinct()
+                            ->pluck('per', 'per')
+                        )
+                        ->searchable()
+                        ->createOptionForm([
+                            TextInput::make('per')
+                                ->label('New Per Value')
+                                ->placeholder('e.g. 1 Pkt, 1 Bag, 100 Pcs')
+                                ->required(),
+                        ])
+                        ->createOptionUsing(fn(array $data): string => $data['per']),
                 ])
-                ->createOptionUsing(fn(array $data): string => $data['per']),
+                ->columnSpanFull(),
 
-            Toggle::make('is_active')
-                ->label('Is Active')
-                ->default(true)
-                ->inline(false),
-
-            // Row 2 (edit only): Slug | Slug cont. | Sort Order | (gap)
+            // Row 2 (edit only): Slug (3 cols) | Sort Order (1 col)
             TextInput::make('slug')
                 ->hiddenOn('create')
                 ->required()
                 ->maxLength(255)
                 ->unique(Product::class, 'slug', ignoreRecord: true)
                 ->hint('Auto-generated from name. You can edit.')
-                ->columnSpan(2),
+                ->columnSpan(3),
 
             TextInput::make('sort_order')
                 ->label('Sort Order')
                 ->numeric()
                 ->default(0)
-                ->hiddenOn('create'),
+                ->hiddenOn('create')
+                ->columnSpan(1),
 
-            // Row 3: Description (2 cols) | Image (2 cols)
+            // Row 3: Description (2 cols) | Image (2 cols) — same height
             Textarea::make('description')
-                ->rows(4)
+                ->rows(3)
+                ->extraAttributes(['style' => 'resize:none;'])
                 ->columnSpan(2),
 
             FileUpload::make('image')
                 ->image()
                 ->disk('public')
                 ->directory('products')
-                ->imagePreviewHeight('120')
+                ->imagePreviewHeight('80')
                 ->maxSize(2048)
                 ->columnSpan(2),
+
+            // Hidden — kept in form state for save, toggled via header button
+            Toggle::make('is_active')
+                ->default(true)
+                ->hidden(),
 
             Section::make('Pricing & Site Visibility')
                 ->columnSpanFull()
@@ -322,11 +335,28 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                TrashedFilter::make(),
                 SelectFilter::make('category')->relationship('category', 'name'),
             ])
             ->defaultSort('sort_order')
-            ->actions([EditAction::make()])
-            ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
+            ->actions([
+                EditAction::make(),
+                RestoreAction::make(),
+                ForceDeleteAction::make()->label('Permanently Delete'),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make()->label('Permanently Delete'),
+                ]),
+            ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([SoftDeletingScope::class]);
     }
 
     public static function getRelationManagers(): array

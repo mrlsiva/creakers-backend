@@ -4,11 +4,32 @@ namespace App\Filament\Resources\ProductResource\Pages;
 
 use App\Filament\Resources\ProductResource;
 use App\Models\Site;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('toggleActive')
+                ->label(fn() => $this->data['is_active'] ?? true ? 'Active' : 'Inactive')
+                ->icon(fn() => $this->data['is_active'] ?? true ? 'heroicon-s-check-circle' : 'heroicon-s-x-circle')
+                ->color(fn() => $this->data['is_active'] ?? true ? 'success' : 'gray')
+                ->outlined()
+                ->requiresConfirmation()
+                ->modalHeading(fn() => $this->data['is_active'] ?? true ? 'Deactivate Product?' : 'Activate Product?')
+                ->modalDescription(fn() => $this->data['is_active'] ?? true
+                    ? 'This product will be hidden from all sites.'
+                    : 'This product will become visible on all assigned sites.')
+                ->modalSubmitActionLabel(fn() => $this->data['is_active'] ?? true ? 'Yes, Deactivate' : 'Yes, Activate')
+                ->action(function () {
+                    $this->data['is_active'] = !($this->data['is_active'] ?? true);
+                }),
+        ];
+    }
 
     protected function afterCreate(): void
     {

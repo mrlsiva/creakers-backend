@@ -4,7 +4,10 @@ namespace App\Filament\Resources\ProductResource\Pages;
 
 use App\Filament\Resources\ProductResource;
 use App\Models\Site;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditProduct extends EditRecord
@@ -13,18 +16,35 @@ class EditProduct extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [DeleteAction::make()];
+        return [
+            Action::make('toggleActive')
+                ->label(fn() => $this->data['is_active'] ?? true ? 'Active' : 'Inactive')
+                ->icon(fn() => $this->data['is_active'] ?? true ? 'heroicon-s-check-circle' : 'heroicon-s-x-circle')
+                ->color(fn() => $this->data['is_active'] ?? true ? 'success' : 'gray')
+                ->outlined()
+                ->requiresConfirmation()
+                ->modalHeading(fn() => $this->data['is_active'] ?? true ? 'Deactivate Product?' : 'Activate Product?')
+                ->modalDescription(fn() => $this->data['is_active'] ?? true
+                    ? 'This product will be hidden from all sites.'
+                    : 'This product will become visible on all assigned sites.')
+                ->modalSubmitActionLabel(fn() => $this->data['is_active'] ?? true ? 'Yes, Deactivate' : 'Yes, Activate')
+                ->action(function () {
+                    $this->data['is_active'] = !($this->data['is_active'] ?? true);
+                }),
+
+            DeleteAction::make(),
+            RestoreAction::make(),
+            ForceDeleteAction::make()->label('Permanently Delete'),
+        ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $existingPrices = $this->record->prices()->get()->keyBy('site_id');
 
-        // Pre-tick the sites that already have a price
         $data['selected_sites'] = $existingPrices->keys()->toArray();
         $data['price_all_sites'] = true;
 
-        // Single-price fields (pre-fill from first price)
         $firstPrice = $existingPrices->first();
         if ($firstPrice) {
             $data['mrp']            = $firstPrice->mrp;
@@ -33,7 +53,6 @@ class EditProduct extends EditRecord
             $data['our_price']      = $firstPrice->our_price;
         }
 
-        // Per-site repeater rows (all active sites, pre-fill existing values)
         $data['site_prices'] = Site::where('is_active', true)
             ->get()
             ->map(function ($site) use ($existingPrices) {
@@ -58,7 +77,6 @@ class EditProduct extends EditRecord
         $allSites    = (bool) ($state['price_all_sites'] ?? true);
         $selectedIds = $state['selected_sites'] ?? [];
 
-        // Remove prices for sites that were unchecked
         $this->record->prices()
             ->whereNotIn('site_id', $selectedIds)
             ->delete();
