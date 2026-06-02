@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SiteResource\Pages;
 use App\Models\Site;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -42,6 +43,14 @@ class SiteResource extends Resource
                 ->email()
                 ->required()
                 ->maxLength(255),
+
+            TextInput::make('phone')
+                ->maxLength(100)
+                ->placeholder('+91 98765 43210'),
+
+            Textarea::make('address')
+                ->rows(2)
+                ->columnSpanFull(),
 
             FileUpload::make('logo')
                 ->image()

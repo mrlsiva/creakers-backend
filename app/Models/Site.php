@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Site extends Model
 {
-    protected $fillable = ['name', 'slug', 'admin_email', 'logo', 'is_active'];
+    protected $fillable = ['name', 'slug', 'admin_email', 'phone', 'address', 'logo', 'is_active'];
 
     protected $casts = ['is_active' => 'boolean'];
 
