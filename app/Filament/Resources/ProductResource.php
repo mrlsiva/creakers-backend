@@ -22,6 +22,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -71,8 +72,10 @@ class ProductResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->schema([
+        return $form->columns(4)->schema([
+            // Row 1: Category | Name | Per | Is Active
             Select::make('category_id')
+                ->label('Category')
                 ->relationship('category', 'name')
                 ->required()
                 ->searchable()
@@ -88,32 +91,58 @@ class ProductResource extends Resource
                     }
                 }),
 
+            Select::make('per')
+                ->label('Per')
+                ->options(fn() => Product::whereNotNull('per')
+                    ->where('per', '!=', '')
+                    ->orderBy('per')
+                    ->distinct()
+                    ->pluck('per', 'per')
+                )
+                ->searchable()
+                ->createOptionForm([
+                    TextInput::make('per')
+                        ->label('New Per Value')
+                        ->placeholder('e.g. 1 Pkt, 1 Bag, 100 Pcs')
+                        ->required(),
+                ])
+                ->createOptionUsing(fn(array $data): string => $data['per']),
+
+            Toggle::make('is_active')
+                ->label('Is Active')
+                ->default(true)
+                ->inline(false),
+
+            // Row 2 (edit only): Slug | Slug cont. | Sort Order | (gap)
             TextInput::make('slug')
                 ->hiddenOn('create')
                 ->required()
                 ->maxLength(255)
                 ->unique(Product::class, 'slug', ignoreRecord: true)
-                ->hint('Auto-generated from name. You can edit.'),
+                ->hint('Auto-generated from name. You can edit.')
+                ->columnSpan(2),
 
+            TextInput::make('sort_order')
+                ->label('Sort Order')
+                ->numeric()
+                ->default(0)
+                ->hiddenOn('create'),
+
+            // Row 3: Description (2 cols) | Image (2 cols)
             Textarea::make('description')
-                ->rows(3)
-                ->columnSpanFull(),
+                ->rows(4)
+                ->columnSpan(2),
 
             FileUpload::make('image')
                 ->image()
                 ->disk('public')
                 ->directory('products')
-                ->imagePreviewHeight('80')
+                ->imagePreviewHeight('120')
                 ->maxSize(2048)
-                ->columnSpanFull(),
-
-            TextInput::make('sort_order')
-                ->numeric()
-                ->default(0),
-
-            Toggle::make('is_active')->default(true),
+                ->columnSpan(2),
 
             Section::make('Pricing & Site Visibility')
+                ->columnSpanFull()
                 ->schema([
                     CheckboxList::make('selected_sites')
                         ->label('Show on Sites')
@@ -228,8 +257,7 @@ class ProductResource extends Resource
                         ))
                         ->visible(fn(callable $get) => !(bool) $get('price_all_sites'))
                         ->columnSpanFull(),
-                ])
-                ->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -237,12 +265,61 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('slug')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('category.name')->sortable()->searchable(),
-                TextColumn::make('prices_count')->counts('prices')->label('Sites'),
-                TextColumn::make('sort_order')->sortable(),
-                IconColumn::make('is_active')->boolean(),
+                TextColumn::make('index')
+                    ->label('#')
+                    ->rowIndex(),
+
+                ImageColumn::make('image')
+                    ->label('Image')
+                    ->disk('public')
+                    ->size(48)
+                    ->defaultImageUrl(null),
+
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('per')
+                    ->label('Per'),
+
+                TextColumn::make('prices_count')
+                    ->counts('prices')
+                    ->label('Sites'),
+
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean(),
+
+                // Toggleable — hidden by default
+                TextColumn::make('slug')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('sort_order')
+                    ->label('Sort')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(40)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('category')->relationship('category', 'name'),

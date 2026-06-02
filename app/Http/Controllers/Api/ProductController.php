@@ -93,6 +93,7 @@ class ProductController extends Controller
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
+            'per' => $product->per,
             'description' => $product->description,
             'image' => $product->image ? asset('storage/' . $product->image) : null,
             'gallery' => collect($product->gallery ?? [])->map(fn($img) => asset('storage/' . $img)),
