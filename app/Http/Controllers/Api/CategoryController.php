@@ -13,9 +13,7 @@ class CategoryController extends Controller
     {
         $site = Site::where('slug', $siteSlug)->where('is_active', true)->firstOrFail();
 
-        $categories = Category::with('children')
-            ->whereNull('parent_id')
-            ->where('is_active', true)
+        $categories = Category::where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get()
@@ -35,11 +33,6 @@ class CategoryController extends Controller
             'name' => $category->name,
             'slug' => $category->slug,
             'image' => $category->image ? asset('storage/' . $category->image) : null,
-            'children' => $category->children
-                ->where('is_active', true)
-                ->sortBy('sort_order')
-                ->values()
-                ->map(fn($child) => $this->formatCategory($child)),
         ];
     }
 }

@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -26,27 +26,30 @@ class CategoryResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Select::make('parent_id')
-                ->label('Parent Category')
-                ->relationship('parent', 'name')
-                ->searchable()
-                ->preload()
-                ->nullable(),
-
             TextInput::make('name')
                 ->required()
                 ->maxLength(255)
-                ->live(onBlur: true)
-                ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
+                ->live()
+                ->afterStateUpdated(function ($state, callable $set, $record) {
+                    if (!$record) {
+                        $set('slug', Str::slug($state));
+                    }
+                }),
 
             TextInput::make('slug')
+                ->hiddenOn('create')
                 ->required()
                 ->maxLength(255)
-                ->unique(Category::class, 'slug', ignoreRecord: true),
+                ->unique(Category::class, 'slug', ignoreRecord: true)
+                ->hint('Auto-generated from name. You can edit.'),
 
-            TextInput::make('image')
-                ->maxLength(500)
-                ->placeholder('storage/path/to/image.jpg'),
+            FileUpload::make('image')
+                ->image()
+                ->disk('public')
+                ->directory('categories')
+                ->imagePreviewHeight('80')
+                ->maxSize(2048)
+                ->columnSpanFull(),
 
             TextInput::make('sort_order')
                 ->numeric()
@@ -62,8 +65,6 @@ class CategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('slug'),
-                TextColumn::make('parent.name')->label('Parent')->default('—'),
-                TextColumn::make('children_count')->counts('children')->label('Sub-categories'),
                 TextColumn::make('sort_order')->sortable(),
                 IconColumn::make('is_active')->boolean(),
             ])

@@ -63,13 +63,9 @@ class ProductController extends Controller
         $site = Site::where('slug', $siteSlug)->where('is_active', true)->firstOrFail();
         $category = Category::where('slug', $categorySlug)->where('is_active', true)->firstOrFail();
 
-        $categoryIds = collect([$category->id]);
-        $childIds = Category::where('parent_id', $category->id)->pluck('id');
-        $categoryIds = $categoryIds->merge($childIds);
-
         $perPage = min((int) $request->input('per_page', 20), 100);
         $paginated = Product::with(['category', 'prices' => fn($q) => $q->where('site_id', $site->id)])
-            ->whereIn('category_id', $categoryIds)
+            ->where('category_id', $category->id)
             ->where('is_active', true)
             ->whereHas('prices', fn($q) => $q->where('site_id', $site->id))
             ->orderBy('sort_order')
@@ -100,17 +96,17 @@ class ProductController extends Controller
             'description' => $product->description,
             'image' => $product->image ? asset('storage/' . $product->image) : null,
             'gallery' => collect($product->gallery ?? [])->map(fn($img) => asset('storage/' . $img)),
-            'unit' => $product->unit,
             'category' => [
                 'id' => $product->category->id,
                 'name' => $product->category->name,
                 'slug' => $product->category->slug,
             ],
             'pricing' => $price ? [
-                'mrp' => (float) $price->mrp,
-                'discount_percent' => (float) $price->discount_percent,
-                'our_price' => (float) $price->our_price,
-                'savings' => round((float) $price->mrp - (float) $price->our_price, 2),
+                'mrp'            => (float) $price->mrp,
+                'discount_type'  => $price->discount_type,
+                'discount_value' => (float) $price->discount_value,
+                'our_price'      => (float) $price->our_price,
+                'savings'        => round((float) $price->mrp - (float) $price->our_price, 2),
             ] : null,
         ];
     }

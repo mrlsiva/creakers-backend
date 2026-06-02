@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiteResource\Pages;
 use App\Models\Site;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -41,9 +42,13 @@ class SiteResource extends Resource
                 ->required()
                 ->maxLength(255),
 
-            TextInput::make('logo')
-                ->maxLength(500)
-                ->placeholder('storage/path/to/logo.png'),
+            FileUpload::make('logo')
+                ->image()
+                ->disk('public')
+                ->directory('sites')
+                ->imagePreviewHeight('80')
+                ->maxSize(2048)
+                ->columnSpanFull(),
 
             Toggle::make('is_active')->default(true),
         ]);

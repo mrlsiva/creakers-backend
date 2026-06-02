@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductPrice extends Model
 {
-    protected $fillable = ['product_id', 'site_id', 'mrp', 'discount_percent', 'our_price'];
+    protected $fillable = ['product_id', 'site_id', 'mrp', 'discount_type', 'discount_value', 'our_price'];
 
     protected $casts = [
-        'mrp' => 'decimal:2',
-        'discount_percent' => 'decimal:2',
-        'our_price' => 'decimal:2',
+        'mrp'            => 'decimal:2',
+        'discount_value' => 'decimal:2',
+        'our_price'      => 'decimal:2',
     ];
 
     public function product(): BelongsTo
