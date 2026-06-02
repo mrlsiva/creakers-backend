@@ -13,6 +13,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -64,6 +65,11 @@ class CategoryResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('index')->label('#')->rowIndex(),
+                ImageColumn::make('image')
+                    ->label('Image')
+                    ->disk('public')
+                    ->size(48)
+                    ->defaultImageUrl(asset('images/default-product.svg')),
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('slug')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sort_order')->sortable()->toggleable(isToggledHiddenByDefault: true),

@@ -13,6 +13,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -58,16 +59,22 @@ class SiteResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('index')->label('#')->rowIndex(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('slug')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('admin_email')->searchable(),
-                IconColumn::make('is_active')->boolean()->label('Active'),
+                TextColumn::make('index')->label('#')->rowIndex()->toggleable(),
+                ImageColumn::make('logo')
+                    ->disk('public')
+                    ->size(48)
+                    ->defaultImageUrl(asset('images/default-product.svg'))
+                    ->toggleable(),
+                TextColumn::make('name')->searchable()->sortable()->toggleable(),
+                TextColumn::make('slug')->searchable()->toggleable(),
+                TextColumn::make('admin_email')->searchable()->toggleable(),
+                IconColumn::make('is_active')->boolean()->label('Active')->toggleable(),
                 TextColumn::make('orders_count')
                     ->counts('orders')
                     ->label('Orders')
-                    ->sortable(),
-                TextColumn::make('created_at')->dateTime('d M Y')->sortable(),
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('created_at')->dateTime('d M Y')->sortable()->toggleable(),
             ])
             ->actions([EditAction::make()])
             ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()])]);

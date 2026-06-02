@@ -34,13 +34,7 @@ class OrderResource extends Resource
                 ->options(Order::statuses())
                 ->required(),
 
-            TextInput::make('status_description')
-                ->label('Status Track')
-                ->disabled()
-                ->dehydrated(false)
-                ->columnSpanFull(),
-
-            Textarea::make('notes')->rows(2)->columnSpanFull(),
+Textarea::make('notes')->rows(2)->columnSpanFull(),
         ]);
     }
 
@@ -82,15 +76,7 @@ class OrderResource extends Resource
                 TextColumn::make('status')
                     ->badge()
                     ->toggleable()
-                    ->color(fn(string $state) => match ($state) {
-                        'pending'    => 'warning',
-                        'confirmed'  => 'info',
-                        'processing' => 'info',
-                        'dispatched' => 'primary',
-                        'delivered'  => 'success',
-                        'cancelled'  => 'danger',
-                        default      => 'gray',
-                    }),
+                    ->color(fn(string $state) => Order::statusColor($state)),
 
                 TextColumn::make('created_at')
                     ->dateTime('d M Y, h:i A')

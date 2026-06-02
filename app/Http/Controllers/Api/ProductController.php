@@ -29,11 +29,12 @@ class ProductController extends Controller
 
         $perPage = min((int) $request->input('per_page', 20), 100);
         $paginated = $query->orderBy('sort_order')->orderBy('name')->paginate($perPage);
+        $fallback = $this->fallbackImage($site);
 
         return response()->json([
             'success' => true,
             'site' => ['name' => $site->name, 'slug' => $site->slug],
-            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site->id)),
+            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site->id, $fallback)),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -54,7 +55,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $this->formatProduct($product, $site->id),
+            'data' => $this->formatProduct($product, $site->id, $this->fallbackImage($site)),
         ]);
     }
 
@@ -72,10 +73,12 @@ class ProductController extends Controller
             ->orderBy('name')
             ->paginate($perPage);
 
+        $fallback = $this->fallbackImage($site);
+
         return response()->json([
             'success' => true,
             'category' => ['name' => $category->name, 'slug' => $category->slug],
-            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site->id)),
+            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site->id, $fallback)),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -85,7 +88,14 @@ class ProductController extends Controller
         ]);
     }
 
-    private function formatProduct(Product $product, int $siteId): array
+    private function fallbackImage(Site $site): string
+    {
+        return $site->logo
+            ? asset('storage/' . $site->logo)
+            : asset('images/default-product.svg');
+    }
+
+    private function formatProduct(Product $product, int $siteId, string $fallback): array
     {
         $price = $product->prices->first();
 
@@ -95,7 +105,7 @@ class ProductController extends Controller
             'slug' => $product->slug,
             'per' => $product->per,
             'description' => $product->description,
-            'image' => $product->image ? asset('storage/' . $product->image) : null,
+            'image' => $product->image ? asset('storage/' . $product->image) : $fallback,
             'gallery' => collect($product->gallery ?? [])->map(fn($img) => asset('storage/' . $img)),
             'category' => [
                 'id' => $product->category->id,

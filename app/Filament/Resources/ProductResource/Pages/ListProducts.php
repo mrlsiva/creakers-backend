@@ -12,6 +12,7 @@ use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ListProducts extends ListRecords
@@ -55,11 +56,11 @@ class ListProducts extends ListRecords
                             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         ])
                         ->required()
-                        ->helperText('Columns: Category, Name, Slug (optional), Per, Description, Sort Order, Is Active (Yes/No)'),
+                        ->helperText('Columns: Category, Name, Slug (optional), Per, Description, Sort Order, Is Active (Yes/No), All Sites (Yes/No), Site, MRP, Discount Type (percentage/flat), Discount Value, Our Price'),
                 ])
                 ->action(function (array $data) {
                     try {
-                        Excel::import(new ProductsImport(), storage_path('app/' . $data['file']));
+                        Excel::import(new ProductsImport(), Storage::disk('local')->path($data['file']));
                         Notification::make()->title('Products imported successfully')->success()->send();
                     } catch (\Throwable $e) {
                         Notification::make()->title('Import failed: ' . $e->getMessage())->danger()->send();

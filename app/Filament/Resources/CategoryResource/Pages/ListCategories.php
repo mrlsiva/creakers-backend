@@ -13,6 +13,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ListCategories extends ListRecords
@@ -60,7 +61,7 @@ class ListCategories extends ListRecords
                 ])
                 ->action(function (array $data) {
                     try {
-                        Excel::import(new CategoriesImport(), storage_path('app/' . $data['file']));
+                        Excel::import(new CategoriesImport(), Storage::disk('local')->path($data['file']));
                         Notification::make()->title('Categories imported successfully')->success()->send();
                     } catch (\Throwable $e) {
                         Notification::make()->title('Import failed: ' . $e->getMessage())->danger()->send();

@@ -286,7 +286,7 @@ class ProductResource extends Resource
                     ->label('Image')
                     ->disk('public')
                     ->size(48)
-                    ->defaultImageUrl(null),
+                    ->defaultImageUrl(asset('images/default-product.svg')),
 
                 TextColumn::make('name')
                     ->searchable()

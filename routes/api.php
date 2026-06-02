@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SiteController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('sites', [SiteController::class, 'index']);
+
 Route::prefix('{site}')->group(function () {
     Route::get('/', [SiteController::class, 'show']);
 

@@ -13,11 +13,15 @@ class CategoryController extends Controller
     {
         $site = Site::where('slug', $siteSlug)->where('is_active', true)->firstOrFail();
 
+        $fallback = $site->logo
+            ? asset('storage/' . $site->logo)
+            : asset('images/default-product.svg');
+
         $categories = Category::where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get()
-            ->map(fn($cat) => $this->formatCategory($cat));
+            ->map(fn($cat) => $this->formatCategory($cat, $fallback));
 
         return response()->json([
             'success' => true,
@@ -26,13 +30,13 @@ class CategoryController extends Controller
         ]);
     }
 
-    private function formatCategory(Category $category): array
+    private function formatCategory(Category $category, string $fallback): array
     {
         return [
             'id' => $category->id,
             'name' => $category->name,
             'slug' => $category->slug,
-            'image' => $category->image ? asset('storage/' . $category->image) : null,
+            'image' => $category->image ? asset('storage/' . $category->image) : $fallback,
         ];
     }
 }

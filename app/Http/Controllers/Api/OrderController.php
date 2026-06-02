@@ -48,7 +48,7 @@ class OrderController extends Controller
                 'customer_state' => $validated['customer_state'] ?? null,
                 'customer_pincode' => $validated['customer_pincode'],
                 'notes' => $validated['notes'] ?? null,
-                'status' => Order::STATUS_PENDING,
+                'status' => Order::defaultStatus(),
             ]);
 
             $total = 0;

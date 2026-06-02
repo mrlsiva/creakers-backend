@@ -8,6 +8,23 @@ use Illuminate\Http\JsonResponse;
 
 class SiteController extends Controller
 {
+    public function index(): JsonResponse
+    {
+        $sites = Site::where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(fn($site) => [
+                'name' => $site->name,
+                'slug' => $site->slug,
+                'logo' => $site->logo ? asset('storage/' . $site->logo) : null,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $sites,
+        ]);
+    }
+
     public function show(string $siteSlug): JsonResponse
     {
         $site = Site::where('slug', $siteSlug)->where('is_active', true)->firstOrFail();

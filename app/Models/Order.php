@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Order extends Model
 {
@@ -17,40 +18,39 @@ class Order extends Model
 
     protected $casts = ['total_amount' => 'decimal:2'];
 
-    const STATUS_PENDING = 'pending';
-    const STATUS_CONFIRMED = 'confirmed';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_DISPATCHED = 'dispatched';
-    const STATUS_DELIVERED = 'delivered';
-    const STATUS_CANCELLED = 'cancelled';
-
     public static function statuses(): array
     {
-        return [
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_CONFIRMED => 'Confirmed',
-            self::STATUS_PROCESSING => 'Processing',
-            self::STATUS_DISPATCHED => 'Dispatched',
-            self::STATUS_DELIVERED => 'Delivered',
-            self::STATUS_CANCELLED => 'Cancelled',
-        ];
+        return Cache::remember('order_statuses', 60, fn() =>
+            OrderStatus::where('is_active', true)
+                ->orderBy('sort_order')
+                ->pluck('name', 'key')
+                ->toArray()
+        );
     }
 
-    public static function statusDescriptions(): array
+    public static function statusColor(string $key): string
     {
-        return [
-            self::STATUS_PENDING => 'Order received and awaiting confirmation.',
-            self::STATUS_CONFIRMED => 'Order has been confirmed by the admin.',
-            self::STATUS_PROCESSING => 'Order is being prepared and packed.',
-            self::STATUS_DISPATCHED => 'Order has been dispatched and is on its way.',
-            self::STATUS_DELIVERED => 'Order has been delivered to the customer.',
-            self::STATUS_CANCELLED => 'Order has been cancelled.',
-        ];
+        $colors = Cache::remember('order_status_colors', 60, fn() =>
+            OrderStatus::where('is_active', true)
+                ->pluck('color', 'key')
+                ->toArray()
+        );
+
+        return $colors[$key] ?? 'gray';
     }
 
-    public function getStatusDescriptionAttribute(): string
+    public static function defaultStatus(): string
     {
-        return self::statusDescriptions()[$this->status] ?? 'Status information unavailable.';
+        return Cache::remember('order_default_status', 60, fn() =>
+            OrderStatus::where('is_default', true)->value('key') ?? 'pending'
+        );
+    }
+
+    public static function clearStatusCache(): void
+    {
+        Cache::forget('order_statuses');
+        Cache::forget('order_status_colors');
+        Cache::forget('order_default_status');
     }
 
     public function site(): BelongsTo
