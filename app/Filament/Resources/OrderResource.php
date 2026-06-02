@@ -11,7 +11,13 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
@@ -35,6 +41,103 @@ class OrderResource extends Resource
                 ->required(),
 
 Textarea::make('notes')->rows(2)->columnSpanFull(),
+        ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+
+            // ── Enquiry header ──
+            Section::make()->schema([
+                Grid::make(3)->schema([
+                    TextEntry::make('order_number')
+                        ->label('Enquiry No')
+                        ->weight(FontWeight::Bold)
+                        ->size(TextEntry\TextEntrySize::Large),
+
+                    TextEntry::make('status')
+                        ->label('Status')
+                        ->badge()
+                        ->color(fn($state) => Order::statusColor($state)),
+
+                    TextEntry::make('created_at')
+                        ->label('Date')
+                        ->date('d/m/Y'),
+                ]),
+            ]),
+
+            // ── From / To ──
+            Grid::make(2)->schema([
+                Section::make('From')
+                    ->columnSpan(1)
+                    ->schema([
+                        TextEntry::make('site.name')
+                            ->label('')
+                            ->weight(FontWeight::Bold)
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->color('danger'),
+                        TextEntry::make('site.address')->label('Address')->default('—'),
+                        TextEntry::make('site.phone')->label('Phone')->default('—'),
+                        TextEntry::make('site.admin_email')->label('Email')->default('—'),
+                    ]),
+
+                Section::make('To')
+                    ->columnSpan(1)
+                    ->schema([
+                        TextEntry::make('customer_name')
+                            ->label('')
+                            ->weight(FontWeight::Bold)
+                            ->size(TextEntry\TextEntrySize::Large),
+                        TextEntry::make('customer_full_address')
+                            ->label('Address')
+                            ->state(fn($record) => implode(', ', array_filter([
+                                $record->customer_address,
+                                $record->customer_city,
+                                $record->customer_district,
+                                $record->customer_state,
+                            ])) . ($record->customer_pincode ? ' - ' . $record->customer_pincode : '') ?: '—'),
+                        TextEntry::make('customer_phone')->label('Phone')->default('—'),
+                        TextEntry::make('customer_email')->label('Email')->default('—'),
+                    ]),
+            ]),
+
+            // ── Items table ──
+            Section::make('Order Items')->schema([
+                RepeatableEntry::make('items')
+                    ->label('')
+                    ->schema([
+                        TextEntry::make('product_id')->label('Code'),
+                        TextEntry::make('product_name')->label('Product'),
+                        TextEntry::make('category_name')->label('Category')->default('—'),
+                        TextEntry::make('mrp')->label('MRP')->money('INR'),
+                        TextEntry::make('disc_pct')
+                            ->label('Disc %')
+                            ->state(fn($record) => $record->mrp > 0
+                                ? round((($record->mrp - $record->our_price) / $record->mrp) * 100) . '%'
+                                : '0%'),
+                        TextEntry::make('our_price')->label('Our Price')->money('INR'),
+                        TextEntry::make('quantity')->label('Qty'),
+                        TextEntry::make('subtotal')->label('Total')->money('INR'),
+                    ])
+                    ->columns(8),
+            ]),
+
+            // ── Summary ──
+            Section::make()->schema([
+                Grid::make(2)->schema([
+                    TextEntry::make('notes')->label('Notes')->default('—')->columnSpan(1),
+                    TextEntry::make('total_amount')
+                        ->label('Payable Amount')
+                        ->money('INR')
+                        ->weight(FontWeight::Bold)
+                        ->size(TextEntry\TextEntrySize::Large)
+                        ->color('success')
+                        ->columnSpan(1)
+                        ->alignEnd(),
+                ]),
+            ]),
+
         ]);
     }
 
