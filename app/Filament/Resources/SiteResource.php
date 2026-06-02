@@ -58,10 +58,11 @@ class SiteResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('index')->label('#')->rowIndex(),
                 TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('slug')->searchable(),
+                TextColumn::make('slug')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('admin_email')->searchable(),
-                IconColumn::make('is_active')->boolean(),
+                IconColumn::make('is_active')->boolean()->label('Active'),
                 TextColumn::make('orders_count')
                     ->counts('orders')
                     ->label('Orders')

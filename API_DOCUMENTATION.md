@@ -287,7 +287,7 @@ Content-Type: application/json
 | `customer_phone`    | string  | Yes      | Max 20 chars                   |
 | `customer_email`    | string  | No       | Valid email — gets confirmation mail |
 | `customer_address`  | string  | Yes      | Full street address            |
-| `customer_city`     | string  | No       |                                |
+| `customer_city`     | string  | Yes      |                                |
 | `customer_district` | string  | No       |                                |
 | `customer_state`    | string  | No       |                                |
 | `customer_pincode`  | string  | Yes      | Max 10 chars                   |
@@ -344,6 +344,27 @@ GET /api/{site}/orders/{orderNumber}
 GET /api/creakers/orders/ORD-CREAKERS-A1B2C3D4
 ```
 
+---
+
+### Track an Order
+
+```
+GET /api/{site}/orders/track?customer_phone=9876543210
+```
+
+**Query Parameters**
+
+- `order_number` string
+- `customer_email` string
+- `customer_phone` string
+
+At least one of the above fields is required.
+
+**Example**
+```
+GET /api/creakers/orders/track?customer_phone=9876543210
+```
+
 **Response `200`**
 ```json
 {
@@ -355,7 +376,9 @@ GET /api/creakers/orders/ORD-CREAKERS-A1B2C3D4
     "customer_phone": "9876543210",
     "customer_email": "ravi@example.com",
     "customer_address": "12, MG Road",
+    "customer_city": "Chennai",
     "customer_district": "Chennai",
+    "customer_state": "Tamil Nadu",
     "customer_pincode": "600001",
     "total_amount": 168.00,
     "notes": "Please pack carefully",
@@ -373,6 +396,15 @@ GET /api/creakers/orders/ORD-CREAKERS-A1B2C3D4
   }
 }
 ```
+
+**Response `422`** — if no search parameter is provided
+```json
+{
+  "message": "Provide order_number, customer_email, or customer_phone to track the order."
+}
+```
+
+**Response `404`** — no matching order found
 
 **Order Status Values**
 
@@ -425,3 +457,4 @@ To navigate pages use `?page=2`, `?page=3`, etc.
 | GET    | `/api/{site}/products/{slug}`                   | Single product detail     |
 | POST   | `/api/{site}/orders`                            | Place an order            |
 | GET    | `/api/{site}/orders/{orderNumber}`              | Get order details         |
+| GET    | `/api/{site}/orders/track`                      | Track order by order number, email, or phone |

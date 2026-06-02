@@ -25,7 +25,7 @@ class OrderController extends Controller
             'customer_phone' => 'required|string|max:20',
             'customer_email' => 'nullable|email|max:255',
             'customer_address' => 'required|string',
-            'customer_city' => 'nullable|string|max:100',
+            'customer_city' => 'required|string|max:100',
             'customer_district' => 'nullable|string|max:100',
             'customer_state' => 'nullable|string|max:100',
             'customer_pincode' => 'required|string|max:10',
@@ -109,25 +109,63 @@ class OrderController extends Controller
         ], 201);
     }
 
-    public function show(string $siteSlug, string $orderNumber): JsonResponse
+    public function track(Request $request, string $siteSlug): JsonResponse
     {
         $site = Site::where('slug', $siteSlug)->firstOrFail();
 
-        $order = Order::with('items')
-            ->where('site_id', $site->id)
-            ->where('order_number', $orderNumber)
-            ->firstOrFail();
+        $validated = $request->validate([
+            'order_number' => 'nullable|string',
+            'customer_email' => 'nullable|email|max:255',
+            'customer_phone' => 'nullable|string|max:20',
+        ]);
+
+        if (empty($validated['order_number']) && empty($validated['customer_email']) && empty($validated['customer_phone'])) {
+            return response()->json([
+                'message' => 'Provide order_number, customer_email, or customer_phone to track the order.',
+            ], 422);
+        }
+
+        $query = Order::with('items')->where('site_id', $site->id);
+
+        // Order number is unique — return single order
+        if (!empty($validated['order_number'])) {
+            $order = $query->where('order_number', $validated['order_number'])->firstOrFail();
+            return response()->json(['success' => true, 'data' => $this->formatOrder($order)]);
+        }
+
+        if (!empty($validated['customer_email'])) {
+            $query->where('customer_email', $validated['customer_email']);
+        }
+
+        if (!empty($validated['customer_phone'])) {
+            $query->where('customer_phone', $validated['customer_phone']);
+        }
+
+        $orders = $query->orderByDesc('created_at')->get();
+
+        if ($orders->isEmpty()) {
+            return response()->json(['message' => 'No orders found.'], 404);
+        }
 
         return response()->json([
             'success' => true,
-            'data' => [
+            'total' => $orders->count(),
+            'data' => $orders->map(fn($order) => $this->formatOrder($order)),
+        ]);
+    }
+
+    private function formatOrder(Order $order): array
+    {
+        return [
                 'order_number' => $order->order_number,
                 'status' => $order->status,
                 'customer_name' => $order->customer_name,
                 'customer_phone' => $order->customer_phone,
                 'customer_email' => $order->customer_email,
                 'customer_address' => $order->customer_address,
+                'customer_city' => $order->customer_city,
                 'customer_district' => $order->customer_district,
+                'customer_state' => $order->customer_state,
                 'customer_pincode' => $order->customer_pincode,
                 'total_amount' => (float) $order->total_amount,
                 'notes' => $order->notes,
@@ -139,8 +177,19 @@ class OrderController extends Controller
                     'our_price' => (float) $item->our_price,
                     'quantity' => $item->quantity,
                     'subtotal' => (float) $item->subtotal,
-                ]),
-            ],
-        ]);
+                ])->toArray(),
+        ];
+    }
+
+    public function show(string $siteSlug, string $orderNumber): JsonResponse
+    {
+        $site = Site::where('slug', $siteSlug)->firstOrFail();
+
+        $order = Order::with('items')
+            ->where('site_id', $site->id)
+            ->where('order_number', $orderNumber)
+            ->firstOrFail();
+
+        return response()->json(['success' => true, 'data' => $this->formatOrder($order)]);
     }
 }

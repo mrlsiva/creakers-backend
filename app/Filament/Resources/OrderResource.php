@@ -5,16 +5,21 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers\ItemsRelationManager;
 use App\Models\Order;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderResource extends Resource
 {
@@ -29,6 +34,12 @@ class OrderResource extends Resource
                 ->options(Order::statuses())
                 ->required(),
 
+            TextInput::make('status_description')
+                ->label('Status Track')
+                ->disabled()
+                ->dehydrated(false)
+                ->columnSpanFull(),
+
             Textarea::make('notes')->rows(2)->columnSpanFull(),
         ]);
     }
@@ -37,35 +48,104 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('order_number')->searchable()->sortable(),
-                TextColumn::make('site.name')->sortable()->searchable(),
-                TextColumn::make('customer_name')->searchable(),
-                TextColumn::make('customer_phone'),
+                TextColumn::make('index')
+                    ->label('#')
+                    ->rowIndex(),
+
+                TextColumn::make('order_number')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
+                TextColumn::make('site.name')
+                    ->label('Site')
+                    ->sortable()
+                    ->toggleable(),
+
+                TextColumn::make('customer_name')
+                    ->searchable()
+                    ->toggleable(),
+
+                TextColumn::make('customer_phone')
+                    ->searchable()
+                    ->toggleable(),
+
+                TextColumn::make('customer_email')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('total_amount')
                     ->money('INR')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
+
                 TextColumn::make('status')
                     ->badge()
+                    ->toggleable()
                     ->color(fn(string $state) => match ($state) {
-                        'pending' => 'warning',
-                        'confirmed' => 'info',
+                        'pending'    => 'warning',
+                        'confirmed'  => 'info',
                         'processing' => 'info',
                         'dispatched' => 'primary',
-                        'delivered' => 'success',
-                        'cancelled' => 'danger',
-                        default => 'gray',
+                        'delivered'  => 'success',
+                        'cancelled'  => 'danger',
+                        default      => 'gray',
                     }),
-                TextColumn::make('created_at')->dateTime('d M Y, h:i A')->sortable(),
+
+                TextColumn::make('created_at')
+                    ->dateTime('d M Y, h:i A')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('status')->options(Order::statuses()),
-                SelectFilter::make('site')->relationship('site', 'name'),
+                Filter::make('date_range')
+                    ->label('Order Date')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label('From Date')
+                            ->native(false)
+                            ->displayFormat('d M Y'),
+                        DatePicker::make('to')
+                            ->label('To Date')
+                            ->native(false)
+                            ->displayFormat('d M Y'),
+                    ])
+                    ->columns(2)
+                    ->columnSpan(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn($q) => $q->whereDate('created_at', '>=', $data['from']))
+                            ->when($data['to'],   fn($q) => $q->whereDate('created_at', '<=', $data['to']));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['from']) {
+                            $indicators[] = 'From: ' . Carbon::parse($data['from'])->format('d M Y');
+                        }
+                        if ($data['to']) {
+                            $indicators[] = 'To: ' . Carbon::parse($data['to'])->format('d M Y');
+                        }
+                        return $indicators;
+                    }),
+
+                SelectFilter::make('status')
+                    ->options(Order::statuses())
+                    ->columnSpan(1),
+
+                SelectFilter::make('site')
+                    ->relationship('site', 'name')
+                    ->columnSpan(1),
             ])
+            ->filtersFormColumns(2)
             ->actions([
-                ViewAction::make(),
-                EditAction::make()->label('Update Status'),
-            ]);
+                ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->tooltip('View'),
+                EditAction::make()
+                    ->icon('heroicon-s-pencil-square')
+                    ->tooltip('Update Status'),
+            ]); 
     }
 
     public static function getRelationManagers(): array

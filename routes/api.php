@@ -16,5 +16,6 @@ Route::prefix('{site}')->group(function () {
     Route::get('products/{slug}', [ProductController::class, 'show']);
 
     Route::post('orders', [OrderController::class, 'store']);
+    Route::get('orders/track', [OrderController::class, 'track']);
     Route::get('orders/{orderNumber}', [OrderController::class, 'show']);
 });

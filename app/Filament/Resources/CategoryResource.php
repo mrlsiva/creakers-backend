@@ -63,10 +63,11 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('index')->label('#')->rowIndex(),
                 TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('slug'),
-                TextColumn::make('sort_order')->sortable(),
-                IconColumn::make('is_active')->boolean(),
+                TextColumn::make('slug')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('sort_order')->sortable()->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_active')->boolean()->label('Active'),
             ])
             ->defaultSort('sort_order')
             ->actions([EditAction::make()])

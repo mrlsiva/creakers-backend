@@ -36,6 +36,23 @@ class Order extends Model
         ];
     }
 
+    public static function statusDescriptions(): array
+    {
+        return [
+            self::STATUS_PENDING => 'Order received and awaiting confirmation.',
+            self::STATUS_CONFIRMED => 'Order has been confirmed by the admin.',
+            self::STATUS_PROCESSING => 'Order is being prepared and packed.',
+            self::STATUS_DISPATCHED => 'Order has been dispatched and is on its way.',
+            self::STATUS_DELIVERED => 'Order has been delivered to the customer.',
+            self::STATUS_CANCELLED => 'Order has been cancelled.',
+        ];
+    }
+
+    public function getStatusDescriptionAttribute(): string
+    {
+        return self::statusDescriptions()[$this->status] ?? 'Status information unavailable.';
+    }
+
     public function site(): BelongsTo
     {
         return $this->belongsTo(Site::class);
