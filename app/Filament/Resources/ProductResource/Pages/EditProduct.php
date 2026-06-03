@@ -43,10 +43,15 @@ class EditProduct extends EditRecord
         $existingPrices = $this->record->prices()->get()->keyBy('site_id');
 
         $data['selected_sites'] = $existingPrices->keys()->toArray();
-        $data['price_all_sites'] = true;
+
+        $uniquePrices = $existingPrices->unique(
+            fn($p) => $p->mrp . '|' . $p->discount_type . '|' . $p->discount_value . '|' . $p->our_price
+        );
+        $allSame = $uniquePrices->count() <= 1;
+        $data['price_all_sites'] = $allSame;
 
         $firstPrice = $existingPrices->first();
-        if ($firstPrice) {
+        if ($firstPrice && $allSame) {
             $data['mrp']            = $firstPrice->mrp;
             $data['discount_type']  = $firstPrice->discount_type;
             $data['discount_value'] = $firstPrice->discount_value;
@@ -54,6 +59,7 @@ class EditProduct extends EditRecord
         }
 
         $data['site_prices'] = Site::where('is_active', true)
+            ->whereIn('id', $existingPrices->keys()->toArray())
             ->get()
             ->map(function ($site) use ($existingPrices) {
                 $price = $existingPrices->get($site->id);
