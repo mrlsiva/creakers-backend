@@ -16,27 +16,16 @@
         }
 
         /* ── Top header bar ── */
-        .doc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .doc-header .enquiry-no  { font-size: 12px; color: #333; }
-        .doc-header .doc-title   { font-size: 20px; font-weight: bold; letter-spacing: 4px; color: #222; }
-        .doc-header .doc-date    { font-size: 12px; color: #333; }
-
-        /* ── Divider ── */
-        hr { border: none; border-top: 1.5px solid #e74c3c; margin-bottom: 14px; }
+        .doc-header { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        .doc-header td { padding: 0; border: none; }
+        .doc-header .doc-title   { font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #222; }
+        .doc-header .doc-right   { text-align: right; vertical-align: top; }
+        .doc-header .enquiry-no  { font-size: 11px; color: #555; }
+        .doc-header .doc-date    { font-size: 12px; color: #333; margin-top: 3px; }
 
         /* ── From / To section ── */
-        .parties {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 18px;
-            gap: 20px;
-        }
-        .party { width: 48%; }
+        .parties { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        .party { width: 50%; vertical-align: top; text-align: left; padding-right: 16px; }
         .party .label {
             font-size: 10px;
             color: #888;
@@ -115,47 +104,52 @@
 <body>
 
     {{-- Header --}}
-    <div class="doc-header">
-        <span class="enquiry-no">Enquiry No : {{ $order->order_number }}</span>
-        <span class="doc-title">ENQUIRY</span>
-        <span class="doc-date">Date : {{ $order->created_at->format('d/m/Y') }}</span>
-    </div>
-
-    <hr>
+    <table class="doc-header">
+        <tr>
+            <td style="vertical-align:top;">
+                <div class="doc-title">ENQUIRY</div>
+            </td>
+            <td class="doc-right">
+                <div class="enquiry-no">Enquiry No : {{ $order->order_number }}</div>
+                <div class="doc-date">Date : {{ $order->created_at->format('d/m/Y') }}</div>
+            </td>
+        </tr>
+    </table>
 
     {{-- From / To --}}
-    <div class="parties">
-        <div class="party">
-            <div class="label">From</div>
-            <div class="company-name">{{ $order->site->name }}</div>
-            @if($order->site->address)
-                <div class="detail-line">{{ $order->site->address }}</div>
-            @endif
-            @if($order->site->phone)
-                <div class="phone-line">📞 {{ $order->site->phone }}</div>
-            @endif
-            @if($order->site->admin_email)
-                <div class="email-line">✉ {{ $order->site->admin_email }}</div>
-            @endif
-        </div>
-
-        <div class="party">
-            <div class="label">To</div>
-            <div class="company-name">{{ $order->customer_name }}</div>
-            @if($order->customer_address)
-                <div class="detail-line">{{ $order->customer_address }}</div>
-            @endif
-            @if($order->customer_city || $order->customer_district)
-                <div class="detail-line">
-                    {{ implode(', ', array_filter([$order->customer_city, $order->customer_district])) }}
-                    @if($order->customer_pincode) - {{ $order->customer_pincode }} @endif
-                </div>
-            @endif
-            @if($order->customer_phone)
-                <div class="phone-line">📞 {{ $order->customer_phone }}</div>
-            @endif
-        </div>
-    </div>
+    <table class="parties">
+        <tr>
+            <td class="party">
+                <div class="label">From</div>
+                <div class="company-name">{{ $order->site->name }}</div>
+                @if($order->site->address)
+                    <div class="detail-line">{{ $order->site->address }}</div>
+                @endif
+                @if($order->site->phone)
+                    <div class="phone-line">📞 {{ $order->site->phone }}</div>
+                @endif
+                @if($order->site->admin_email)
+                    <div class="email-line">✉ {{ $order->site->admin_email }}</div>
+                @endif
+            </td>
+            <td class="party" style="padding-right:0; padding-left:16px; text-align:left;">
+                <div class="label">To</div>
+                <div class="company-name">{{ $order->customer_name }}</div>
+                @if($order->customer_address)
+                    <div class="detail-line">{{ $order->customer_address }}</div>
+                @endif
+                @if($order->customer_city || $order->customer_district)
+                    <div class="detail-line">
+                        {{ implode(', ', array_filter([$order->customer_city, $order->customer_district])) }}
+                        @if($order->customer_pincode) - {{ $order->customer_pincode }} @endif
+                    </div>
+                @endif
+                @if($order->customer_phone)
+                    <div class="phone-line">📞 {{ $order->customer_phone }}</div>
+                @endif
+            </td>
+        </tr>
+    </table>
 
     {{-- Items Table --}}
     <table>
@@ -165,7 +159,7 @@
                 <th>Code</th>
                 <th style="text-align:left;">Product</th>
                 <th>M.R.P</th>
-                <th>Disc %</th>
+                <th>Discount</th>
                 <th>Our Price</th>
                 <th>Qty</th>
                 <th>Total</th>
@@ -174,16 +168,16 @@
         <tbody>
             @foreach($order->items as $i => $item)
             @php
-                $disc = $item->mrp > 0
-                    ? round((($item->mrp - $item->our_price) / $item->mrp) * 100)
-                    : 0;
+                $discLabel = $item->discount_type === 'flat'
+                    ? '₹' . number_format($item->discount_value, 0)
+                    : $item->discount_value . '%';
             @endphp
             <tr>
                 <td>{{ $i + 1 }}</td>
                 <td>{{ $item->product_id }}</td>
                 <td class="product-name">{{ $item->product_name }}</td>
                 <td><span class="mrp-strike">{{ number_format($item->mrp, 0) }}</span></td>
-                <td>{{ $disc }}%</td>
+                <td>{{ $discLabel }}</td>
                 <td>{{ number_format($item->our_price, 0) }}</td>
                 <td>{{ $item->quantity }}</td>
                 <td>{{ number_format($item->subtotal, 0) }}</td>

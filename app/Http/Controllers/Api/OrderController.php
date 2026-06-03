@@ -67,13 +67,15 @@ class OrderController extends Controller
                 $total += $subtotal;
 
                 $order->items()->create([
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'category_name' => $product->category->name ?? null,
-                    'mrp' => $price->mrp,
-                    'our_price' => $price->our_price,
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal,
+                    'product_id'     => $product->id,
+                    'product_name'   => $product->name,
+                    'category_name'  => $product->category->name ?? null,
+                    'mrp'            => $price->mrp,
+                    'our_price'      => $price->our_price,
+                    'discount_type'  => $price->discount_type,
+                    'discount_value' => $price->discount_value,
+                    'quantity'       => $item['quantity'],
+                    'subtotal'       => $subtotal,
                 ]);
             }
 
