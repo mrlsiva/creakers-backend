@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ClientLogoController;
 use App\Http\Controllers\Api\OrderStepController;
+use App\Http\Controllers\Api\PriceListPdfController;
 use App\Http\Controllers\Api\SafetyTipController;
 use App\Http\Controllers\Api\SiteContactController;
 use App\Http\Controllers\Api\SiteContentController;
@@ -33,4 +34,5 @@ Route::prefix('{site}')->group(function () {
     Route::get('client-logos', [ClientLogoController::class, 'index']);
     Route::get('order-steps', [OrderStepController::class, 'index']);
     Route::get('safety-tips', [SafetyTipController::class, 'index']);
+    Route::get('price-lists', [PriceListPdfController::class, 'index']);
 });
