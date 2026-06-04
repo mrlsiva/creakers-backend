@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Models\Site;
 use Filament\Widgets\ChartWidget;
 
 class OrdersByStatusWidget extends ChartWidget
@@ -13,10 +14,26 @@ class OrdersByStatusWidget extends ChartWidget
     protected static ?string $maxHeight = '300px';
     protected int | string | array $columnSpan = 1;
 
+    public ?string $filter = 'all';
+
+    protected function getFilters(): ?array
+    {
+        $sites = Site::where('is_active', true)->orderBy('name')->pluck('name', 'id')->toArray();
+
+        return ['all' => 'All Sites'] + $sites;
+    }
+
     protected function getData(): array
     {
         $statuses = OrderStatus::where('is_active', true)->orderBy('sort_order')->get();
-        $counts   = Order::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status');
+
+        $query = Order::selectRaw('status, COUNT(*) as count')->groupBy('status');
+
+        if ($this->filter && $this->filter !== 'all') {
+            $query->where('site_id', $this->filter);
+        }
+
+        $counts = $query->pluck('count', 'status');
 
         $labels = [];
         $data   = [];

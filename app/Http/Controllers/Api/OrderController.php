@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -36,9 +35,22 @@ class OrderController extends Controller
         ]);
 
         $order = DB::transaction(function () use ($validated, $site) {
+            $prefix = strtoupper(substr($site->name, 0, 4));
+            $year   = now()->year;
+            $yearPrefix = $prefix . '-' . $year . '-';
+
+            $last = Order::where('site_id', $site->id)
+                ->where('order_number', 'like', $yearPrefix . '%')
+                ->lockForUpdate()
+                ->orderByDesc('id')
+                ->value('order_number');
+
+            $sequence = $last ? (intval(substr($last, strlen($yearPrefix))) + 1) : 1;
+            $orderNumber = $yearPrefix . str_pad($sequence, 2, '0', STR_PAD_LEFT);
+
             $order = Order::create([
                 'site_id' => $site->id,
-                'order_number' => 'ORD-' . strtoupper($site->slug) . '-' . strtoupper(Str::random(8)),
+                'order_number' => $orderNumber,
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'] ?? null,
