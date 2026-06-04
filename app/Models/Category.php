@@ -8,9 +8,9 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'image', 'sort_order', 'is_active'];
+    protected $fillable = ['name', 'slug', 'image', 'sort_order', 'is_active', 'is_exclusive'];
 
-    protected $casts = ['is_active' => 'boolean'];
+    protected $casts = ['is_active' => 'boolean', 'is_exclusive' => 'boolean'];
 
     protected static function booted(): void
     {

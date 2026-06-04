@@ -33,10 +33,11 @@ class CategoryController extends Controller
     private function formatCategory(Category $category, string $fallback): array
     {
         return [
-            'id' => $category->id,
-            'name' => $category->name,
-            'slug' => $category->slug,
-            'image' => $category->image ? asset('storage/' . $category->image) : $fallback,
+            'id'           => $category->id,
+            'name'         => $category->name,
+            'slug'         => $category->slug,
+            'image'        => $category->image ? asset('storage/' . $category->image) : $fallback,
+            'is_exclusive' => $category->is_exclusive,
         ];
     }
 }

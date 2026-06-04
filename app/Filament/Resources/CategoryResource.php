@@ -57,6 +57,7 @@ class CategoryResource extends Resource
                 ->default(0),
 
             Toggle::make('is_active')->default(true),
+            Toggle::make('is_exclusive')->label('Our Exclusive Category')->default(false),
         ]);
     }
 
@@ -74,6 +75,7 @@ class CategoryResource extends Resource
                 TextColumn::make('slug')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sort_order')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')->boolean()->label('Active'),
+                IconColumn::make('is_exclusive')->boolean()->label('Exclusive'),
             ])
             ->defaultSort('sort_order')
             ->actions([EditAction::make()])
