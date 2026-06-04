@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Resources\ClientLogoResource;
 use App\Filament\Resources\OrderStepResource;
+use App\Filament\Resources\SafetyTipResource;
 use App\Filament\Resources\SiteContactResource;
 use App\Filament\Resources\SiteContentResource;
 use Filament\Http\Middleware\Authenticate;
@@ -51,6 +52,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('How to Order Steps')
                     ->icon('heroicon-o-list-bullet')
                     ->url(fn() => OrderStepResource::getUrl()),
+                MenuItem::make()
+                    ->label('Safety Tips')
+                    ->icon('heroicon-o-shield-check')
+                    ->url(fn() => SafetyTipResource::getUrl()),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
