@@ -2,9 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\SiteContentResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -29,6 +31,12 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors(['primary' => Color::Emerald])
             ->brandName('Creakers Admin')
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Content Pages')
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn() => SiteContentResource::getUrl()),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([Pages\Dashboard::class])

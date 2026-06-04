@@ -20,4 +20,9 @@ class Site extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function contents(): HasMany
+    {
+        return $this->hasMany(SiteContent::class);
+    }
 }
