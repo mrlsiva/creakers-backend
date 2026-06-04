@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SiteContactController;
 use App\Http\Controllers\Api\SiteContentController;
 use App\Http\Controllers\Api\SiteController;
 use Illuminate\Support\Facades\Route;
@@ -24,4 +25,6 @@ Route::prefix('{site}')->group(function () {
 
     Route::get('content', [SiteContentController::class, 'index']);
     Route::get('content/{key}', [SiteContentController::class, 'show']);
+
+    Route::get('contact', [SiteContactController::class, 'show']);
 });

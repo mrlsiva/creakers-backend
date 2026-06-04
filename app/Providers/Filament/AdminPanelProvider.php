@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\SiteContactResource;
 use App\Filament\Resources\SiteContentResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -36,6 +37,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Content Pages')
                     ->icon('heroicon-o-document-text')
                     ->url(fn() => SiteContentResource::getUrl()),
+                MenuItem::make()
+                    ->label('Contact Info')
+                    ->icon('heroicon-o-phone')
+                    ->url(fn() => SiteContactResource::getUrl()),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

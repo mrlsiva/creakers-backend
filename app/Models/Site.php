@@ -25,4 +25,9 @@ class Site extends Model
     {
         return $this->hasMany(SiteContent::class);
     }
+
+    public function contact(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SiteContact::class);
+    }
 }
