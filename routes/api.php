@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ClientLogoController;
+use App\Http\Controllers\Api\OrderStepController;
 use App\Http\Controllers\Api\SiteContactController;
 use App\Http\Controllers\Api\SiteContentController;
 use App\Http\Controllers\Api\SiteController;
@@ -29,4 +30,5 @@ Route::prefix('{site}')->group(function () {
 
     Route::get('contact', [SiteContactController::class, 'show']);
     Route::get('client-logos', [ClientLogoController::class, 'index']);
+    Route::get('order-steps', [OrderStepController::class, 'index']);
 });
