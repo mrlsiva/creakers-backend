@@ -14,9 +14,11 @@ class SiteController extends Controller
             ->orderBy('name')
             ->get()
             ->map(fn($site) => [
-                'name' => $site->name,
-                'slug' => $site->slug,
-                'logo' => $site->logo ? asset('storage/' . $site->logo) : null,
+                'name'     => $site->name,
+                'title'    => $site->title,
+                'slug'     => $site->slug,
+                'logo'     => $site->logo ? asset('storage/' . $site->logo) : null,
+                'nav_icon' => $site->nav_icon ? asset('storage/' . $site->nav_icon) : null,
             ]);
 
         return response()->json([
@@ -32,9 +34,11 @@ class SiteController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'name' => $site->name,
-                'slug' => $site->slug,
-                'logo' => $site->logo ? asset('storage/' . $site->logo) : null,
+                'name'     => $site->name,
+                'title'    => $site->title,
+                'slug'     => $site->slug,
+                'logo'     => $site->logo ? asset('storage/' . $site->logo) : null,
+                'nav_icon' => $site->nav_icon ? asset('storage/' . $site->nav_icon) : null,
             ],
         ]);
     }

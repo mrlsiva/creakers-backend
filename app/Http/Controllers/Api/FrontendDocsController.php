@@ -29,9 +29,11 @@ class FrontendDocsController extends Controller
                     'response_example' => [
                         'success' => true,
                         'data' => [[
-                            'name' => 'Creakers',
-                            'slug' => 'creakers',
-                            'logo' => 'https://example.com/logo.png',
+                            'name'     => 'Creakers',
+                            'title'    => 'Creakers - Premium Quality Fireworks',
+                            'slug'     => 'creakers',
+                            'logo'     => 'https://example.com/logo.png',
+                            'nav_icon' => 'https://example.com/nav-icon.png',
                         ]],
                     ],
                 ],
@@ -47,9 +49,11 @@ class FrontendDocsController extends Controller
                     'response_example' => [
                         'success' => true,
                         'data' => [
-                            'name' => 'Creakers',
-                            'slug' => 'creakers',
-                            'logo' => 'https://example.com/logo.png',
+                            'name'     => 'Creakers',
+                            'title'    => 'Creakers - Premium Quality Fireworks',
+                            'slug'     => 'creakers',
+                            'logo'     => 'https://example.com/logo.png',
+                            'nav_icon' => 'https://example.com/nav-icon.png',
                         ],
                     ],
                 ],

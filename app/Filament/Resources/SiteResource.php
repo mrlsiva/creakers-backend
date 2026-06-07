@@ -34,6 +34,12 @@ class SiteResource extends Resource
                 ->live(onBlur: true)
                 ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
 
+            TextInput::make('title')
+                ->maxLength(255)
+                ->placeholder('e.g. Vigo Crackers - Premium Quality Fireworks')
+                ->helperText('Shown in the browser tab / page title')
+                ->columnSpan(1),
+
             TextInput::make('slug')
                 ->required()
                 ->maxLength(255)
@@ -60,6 +66,16 @@ class SiteResource extends Resource
                 ->maxSize(2048)
                 ->columnSpanFull(),
 
+            FileUpload::make('nav_icon')
+                ->label('Nav Icon')
+                ->image()
+                ->disk('public')
+                ->directory('sites/nav-icons')
+                ->imagePreviewHeight('48')
+                ->maxSize(512)
+                ->helperText('Small icon shown in the site navigation / browser tab (favicon)')
+                ->columnSpanFull(),
+
             Toggle::make('is_active')->default(true),
         ]);
     }
@@ -74,7 +90,13 @@ class SiteResource extends Resource
                     ->size(48)
                     ->defaultImageUrl(asset('images/default-product.svg'))
                     ->toggleable(),
+                ImageColumn::make('nav_icon')
+                    ->label('Nav Icon')
+                    ->disk('public')
+                    ->size(32)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')->searchable()->sortable()->toggleable(),
+                TextColumn::make('title')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('slug')->searchable()->toggleable(),
                 TextColumn::make('admin_email')->searchable()->toggleable(),
                 IconColumn::make('is_active')->boolean()->label('Active')->toggleable(),

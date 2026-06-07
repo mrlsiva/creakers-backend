@@ -3,7 +3,20 @@
     "allow": [
       "Bash(php -l app/Http/Controllers/Api/HomeBannerController.php)",
       "Bash(php -l app/Filament/Resources/HomeBannerResource.php)",
-      "Bash(php -l app/Models/HomeBanner.php)"
+      "Bash(php -l app/Models/HomeBanner.php)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{url_effective}\\\\n\" \"http://localhost/creakers-backend/public/storage/sites/01KT4K47JWT5Z5TQTEV57HRN0Y.png\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://127.0.0.1:8000/\")",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost/creakers-backend/public/livewire/livewire.js\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost/creakers-backend/public/css/filament/filament/app.css\")",
+      "Bash(curl -s \"http://localhost/creakers-backend/public/admin/login\")",
+      "Bash(curl -s -o /dev/null -w \"ROOT livewire.js: %{http_code}\\\\n\" \"http://localhost/livewire/livewire.js\")",
+      "Bash(curl -s -o /dev/null -w \"ROOT app.js \\(filament forms\\): %{http_code}\\\\n\" \"http://localhost/js/filament/forms/forms.js\")",
+      "Bash(php -l app/Filament/Resources/SiteContentResource.php)",
+      "Bash(php -l app/Filament/Resources/SiteResource.php)",
+      "Bash(php -l app/Http/Controllers/Api/SiteController.php)",
+      "Bash(php -l app/Models/Site.php)",
+      "Bash(php -l app/Http/Controllers/Api/FrontendDocsController.php)"
     ]
   }
 }

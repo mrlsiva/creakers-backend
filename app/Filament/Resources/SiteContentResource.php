@@ -26,6 +26,19 @@ class SiteContentResource extends Resource
     protected static ?int $navigationSort = 6;
     protected static bool $shouldRegisterNavigation = false;
 
+    /**
+     * Allowed content keys. Add new entries here as new content sections are introduced.
+     */
+    public static function keyOptions(): array
+    {
+        return [
+            'about-us'              => 'About Us',
+            'terms-and-conditions'  => 'Terms & Conditions',
+            'popup'                 => 'Popup',
+            'banner-scrolling-text' => 'Banner Scrolling Text',
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -35,13 +48,12 @@ class SiteContentResource extends Resource
                 ->required()
                 ->columnSpan(1),
 
-            TextInput::make('key')
-                ->label('Key (slug)')
-                ->placeholder('e.g. terms-and-conditions')
-                ->helperText('Used in API URL. Lowercase, hyphens only. Unique per site.')
+            Select::make('key')
+                ->label('Key')
+                ->options(self::keyOptions())
+                ->helperText('Used in API URL. Unique per site.')
                 ->required()
-                ->maxLength(100)
-                ->alphaDash()
+                ->searchable()
                 ->columnSpan(1),
 
             TextInput::make('title')
