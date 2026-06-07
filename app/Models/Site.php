@@ -30,4 +30,9 @@ class Site extends Model
     {
         return $this->hasOne(SiteContact::class);
     }
+
+    public function homeBanner(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(HomeBanner::class);
+    }
 }

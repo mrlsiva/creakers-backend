@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\FrontendDocsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ClientLogoController;
+use App\Http\Controllers\Api\HomeBannerController;
 use App\Http\Controllers\Api\OrderStepController;
 use App\Http\Controllers\Api\PriceListPdfController;
 use App\Http\Controllers\Api\SafetyTipController;
@@ -12,6 +14,7 @@ use App\Http\Controllers\Api\SiteContentController;
 use App\Http\Controllers\Api\SiteController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('frontend', [FrontendDocsController::class, 'index']);
 Route::get('sites', [SiteController::class, 'index']);
 
 Route::prefix('{site}')->group(function () {
@@ -30,6 +33,7 @@ Route::prefix('{site}')->group(function () {
     Route::get('content', [SiteContentController::class, 'index']);
     Route::get('content/{key}', [SiteContentController::class, 'show']);
 
+    Route::get('home-banner', [HomeBannerController::class, 'show']);
     Route::get('contact', [SiteContactController::class, 'show']);
     Route::get('client-logos', [ClientLogoController::class, 'index']);
     Route::get('order-steps', [OrderStepController::class, 'index']);

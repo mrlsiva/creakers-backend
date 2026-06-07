@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\ClientLogoResource;
+use App\Filament\Resources\HomeBannerResource;
 use App\Filament\Resources\OrderStepResource;
 use App\Filament\Resources\PriceListPdfResource;
 use App\Filament\Resources\SafetyTipResource;
@@ -37,6 +38,10 @@ class AdminPanelProvider extends PanelProvider
             ->colors(['primary' => Color::Emerald])
             ->brandName('Creakers Admin')
             ->userMenuItems([
+                MenuItem::make()
+                    ->label('Home Banner')
+                    ->icon('heroicon-o-photo')
+                    ->url(fn() => HomeBannerResource::getUrl()),
                 MenuItem::make()
                     ->label('Content Pages')
                     ->icon('heroicon-o-document-text')

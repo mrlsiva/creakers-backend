@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l app/Http/Controllers/Api/HomeBannerController.php)",
+      "Bash(php -l app/Filament/Resources/HomeBannerResource.php)",
+      "Bash(php -l app/Models/HomeBanner.php)"
+    ]
+  }
+}
