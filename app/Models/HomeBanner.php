@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class HomeBanner extends Model
 {
     protected $fillable = [
-        'site_id', 'image', 'title', 'second_title', 'description',
+        'site_id', 'image', 'mobile_image', 'title', 'second_title', 'description',
         'top_small_description', 'buttons',
     ];
 

@@ -16,7 +16,16 @@
       "Bash(php -l app/Filament/Resources/SiteResource.php)",
       "Bash(php -l app/Http/Controllers/Api/SiteController.php)",
       "Bash(php -l app/Models/Site.php)",
-      "Bash(php -l app/Http/Controllers/Api/FrontendDocsController.php)"
+      "Bash(php -l app/Http/Controllers/Api/FrontendDocsController.php)",
+      "Bash(type \"C:\\\\Users\\\\ADMIN\\\\.claude\\\\projects\\\\c--xampp-htdocs-creakers-backend\\\\memory\\\\MEMORY.md\" 2>nul)",
+      "Bash(ls -la \"C:\\\\Users\\\\ADMIN\\\\.claude\\\\projects\\\\c--xampp-htdocs-creakers-backend\\\\memory\\\\\" 2>&1; git diff .claude/settings.json)",
+      "Read(//c/Users/ADMIN/.claude/projects/c--xampp-htdocs-creakers-backend/memory\" 2>&1; git diff .claude/**)",
+      "Bash(ls -la \"/c/Users/ADMIN/.claude/projects/c--xampp-htdocs-creakers-backend/memory/\")",
+      "Read(//c/Users/ADMIN/.claude/projects/c--xampp-htdocs-creakers-backend/memory//**)",
+      "Bash(xargs grep -l \"api.*banner\\\\|banner.*api\")"
+    ],
+    "additionalDirectories": [
+      "c:\\xampp\\htdocs\\creakers-backend"
     ]
   }
 }

@@ -39,13 +39,22 @@ class HomeBannerResource extends Resource
 
             Section::make('Banner')->schema([
                 FileUpload::make('image')
-                    ->label('Banner Image')
+                    ->label('Web Banner Image')
                     ->image()
                     ->directory('home-banners')
                     ->visibility('public')
                     ->imagePreviewHeight('120')
                     ->maxSize(2048)
-                    ->columnSpanFull(),
+                    ->columnSpan(1),
+
+                FileUpload::make('mobile_image')
+                    ->label('Mobile Banner Image')
+                    ->image()
+                    ->directory('home-banners')
+                    ->visibility('public')
+                    ->imagePreviewHeight('120')
+                    ->maxSize(2048)
+                    ->columnSpan(1),
 
                 TextInput::make('top_small_description')
                     ->label('Top Small Description')
@@ -104,6 +113,12 @@ class HomeBannerResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('image')
+                    ->label('Web Image')
+                    ->height(48)
+                    ->width(80),
+
+                ImageColumn::make('mobile_image')
+                    ->label('Mobile Image')
                     ->height(48)
                     ->width(80),
 
