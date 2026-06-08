@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\ClientLogoResource;
+use App\Filament\Resources\FestivalOfferResource;
 use App\Filament\Resources\HomeBannerResource;
 use App\Filament\Resources\OrderStepResource;
 use App\Filament\Resources\PriceListPdfResource;
@@ -42,6 +43,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Home Banner')
                     ->icon('heroicon-o-photo')
                     ->url(fn() => HomeBannerResource::getUrl()),
+                MenuItem::make()
+                    ->label('Festival Offer')
+                    ->icon('heroicon-o-gift')
+                    ->url(fn() => FestivalOfferResource::getUrl()),
                 MenuItem::make()
                     ->label('Content Pages')
                     ->icon('heroicon-o-document-text')

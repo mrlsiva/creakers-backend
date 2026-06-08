@@ -35,4 +35,9 @@ class Site extends Model
     {
         return $this->hasOne(HomeBanner::class);
     }
+
+    public function festivalOffer(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FestivalOffer::class);
+    }
 }

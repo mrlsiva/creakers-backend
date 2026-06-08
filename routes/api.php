@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\FrontendDocsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ClientLogoController;
+use App\Http\Controllers\Api\FestivalOfferController;
 use App\Http\Controllers\Api\HomeBannerController;
 use App\Http\Controllers\Api\OrderStepController;
 use App\Http\Controllers\Api\PriceListPdfController;
@@ -34,6 +35,7 @@ Route::prefix('{site}')->group(function () {
     Route::get('content/{key}', [SiteContentController::class, 'show']);
 
     Route::get('home-banner', [HomeBannerController::class, 'show']);
+    Route::get('festival-offer', [FestivalOfferController::class, 'show']);
     Route::get('contact', [SiteContactController::class, 'show']);
     Route::get('client-logos', [ClientLogoController::class, 'index']);
     Route::get('order-steps', [OrderStepController::class, 'index']);
