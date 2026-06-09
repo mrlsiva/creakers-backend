@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\OrderStep;
 use App\Models\Site;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
 
 class OrderStepController extends Controller
 {
@@ -22,7 +21,7 @@ class OrderStepController extends Controller
                 'step'        => $step->sort_order,
                 'title'       => $step->title,
                 'description' => $step->description,
-                'icon'        => $step->icon ? Storage::url($step->icon) : null,
+                'icon'        => $step->icon ?: null,
             ]);
 
         return response()->json(['success' => true, 'data' => $steps]);

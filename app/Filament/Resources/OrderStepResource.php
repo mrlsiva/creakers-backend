@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderStepResource\Pages;
 use App\Models\OrderStep;
 use App\Models\Site;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -15,7 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -52,13 +50,11 @@ class OrderStepResource extends Resource
                 ->rows(3)
                 ->columnSpanFull(),
 
-            FileUpload::make('icon')
-                ->label('Step Icon')
-                ->image()
-                ->directory('order-step-icons')
-                ->visibility('public')
-                ->imagePreviewHeight('80')
-                ->maxSize(1024)
+            TextInput::make('icon')
+                ->label('Step Icon (Font Awesome)')
+                ->placeholder('e.g. shopping-cart, box, truck, star')
+                ->helperText('Enter a Font Awesome icon name without the "fa-" prefix.')
+                ->maxLength(100)
                 ->columnSpanFull(),
 
             Toggle::make('is_active')
@@ -77,10 +73,11 @@ class OrderStepResource extends Resource
                     ->badge()
                     ->color('info'),
 
-                ImageColumn::make('icon')
-                    ->height(48)
-                    ->width(48)
-                    ->circular(),
+                TextColumn::make('icon')
+                    ->label('Icon')
+                    ->badge()
+                    ->color('gray')
+                    ->prefix('fa-'),
 
                 TextColumn::make('title')
                     ->searchable()
