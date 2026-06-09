@@ -13,6 +13,7 @@ class LatestOrdersWidget extends BaseWidget
 {
     protected static ?string $heading = 'Latest Orders';
     protected static ?int $sort = 3;
+    protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table

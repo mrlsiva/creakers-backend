@@ -11,17 +11,24 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class StatsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
+    protected static ?string $pollingInterval = null;
 
     protected function getStats(): array
     {
-        $totalOrders   = Order::count();
-        $todayOrders   = Order::whereDate('created_at', today())->count();
-        $totalRevenue  = Order::sum('total_amount');
-        $todayRevenue  = Order::whereDate('created_at', today())->sum('total_amount');
-        $totalCustomers = Order::distinct('customer_phone')->count('customer_phone');
-        $activeProducts = Product::where('is_active', true)->count();
-        $activeSites    = Site::where('is_active', true)->count();
-        $pendingOrders  = Order::where('status', 'pending')->count();
+        [$totalOrders, $todayOrders, $totalRevenue, $todayRevenue,
+         $totalCustomers, $activeProducts, $activeSites, $pendingOrders] =
+            cache()->remember('dashboard_stats', 60, function () {
+                return [
+                    Order::count(),
+                    Order::whereDate('created_at', today())->count(),
+                    Order::sum('total_amount'),
+                    Order::whereDate('created_at', today())->sum('total_amount'),
+                    Order::distinct('customer_phone')->count('customer_phone'),
+                    Product::where('is_active', true)->count(),
+                    Site::where('is_active', true)->count(),
+                    Order::where('status', 'pending')->count(),
+                ];
+            });
 
         return [
             Stat::make('Total Orders', number_format($totalOrders))

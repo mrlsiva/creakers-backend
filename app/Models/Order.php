@@ -53,6 +53,18 @@ class Order extends Model
         Cache::forget('order_default_status');
     }
 
+    protected static function booted(): void
+    {
+        $clearDashboard = function () {
+            Cache::forget('dashboard_stats');
+            Cache::forget('widget_orders_by_status_all');
+        };
+
+        static::created($clearDashboard);
+        static::updated($clearDashboard);
+        static::deleted($clearDashboard);
+    }
+
     public function site(): BelongsTo
     {
         return $this->belongsTo(Site::class);

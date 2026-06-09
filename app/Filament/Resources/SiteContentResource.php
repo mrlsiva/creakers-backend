@@ -5,7 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SiteContentResource\Pages;
 use App\Models\Site;
 use App\Models\SiteContent;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -59,7 +62,13 @@ class SiteContentResource extends Resource
             TextInput::make('title')
                 ->required()
                 ->maxLength(255)
-                ->columnSpanFull(),
+                ->columnSpan(1),
+
+            TextInput::make('tag')
+                ->placeholder('e.g. About Us')
+                ->helperText('Small label shown above the title.')
+                ->maxLength(255)
+                ->columnSpan(1),
 
             RichEditor::make('body')
                 ->label('Content')
@@ -69,6 +78,59 @@ class SiteContentResource extends Resource
                     'link', 'h2', 'h3', 'undo', 'redo',
                 ])
                 ->columnSpanFull(),
+
+            FileUpload::make('image')
+                ->image()
+                ->directory('site-contents')
+                ->visibility('public')
+                ->imagePreviewHeight('120')
+                ->maxSize(2048)
+                ->columnSpan(1),
+
+            Section::make('Features')->schema([
+                Repeater::make('features')
+                    ->label('')
+                    ->schema([
+                        TextInput::make('icon')
+                            ->placeholder('e.g. star')
+                            ->helperText('Icon name used by the frontend.')
+                            ->required()
+                            ->columnSpan(1),
+
+                        TextInput::make('title')
+                            ->placeholder('e.g. Premium Quality')
+                            ->required()
+                            ->columnSpan(1),
+
+                        TextInput::make('subtitle')
+                            ->placeholder('e.g. Certified and tested products')
+                            ->required()
+                            ->columnSpan(1),
+                    ])
+                    ->columns(3)
+                    ->addActionLabel('Add Feature')
+                    ->defaultItems(0)
+                    ->collapsible()
+                    ->itemLabel(fn(array $state) => $state['title'] ?? 'New Feature')
+                    ->columnSpanFull(),
+            ])->columnSpanFull(),
+
+            Section::make('Button')->schema([
+                TextInput::make('button_label')
+                    ->placeholder('e.g. Learn More About Us')
+                    ->maxLength(255)
+                    ->columnSpan(1),
+
+                TextInput::make('button_url')
+                    ->label('URL')
+                    ->placeholder('/about')
+                    ->maxLength(255)
+                    ->columnSpan(1),
+
+                Toggle::make('button_open_in_new_tab')
+                    ->label('Open in new window')
+                    ->columnSpanFull(),
+            ])->columns(2),
 
             Toggle::make('is_active')
                 ->default(true)

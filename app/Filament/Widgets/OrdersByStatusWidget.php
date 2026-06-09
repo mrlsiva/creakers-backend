@@ -12,28 +12,34 @@ class OrdersByStatusWidget extends ChartWidget
     protected static ?string $heading = 'Orders by Status';
     protected static ?int $sort = 2;
     protected static ?string $maxHeight = '300px';
+    protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 1;
 
     public ?string $filter = 'all';
 
     protected function getFilters(): ?array
     {
-        $sites = Site::where('is_active', true)->orderBy('name')->pluck('name', 'id')->toArray();
+        $sites = cache()->remember('widget_sites_filter', 300, fn() =>
+            Site::where('is_active', true)->orderBy('name')->pluck('name', 'id')->toArray()
+        );
 
         return ['all' => 'All Sites'] + $sites;
     }
 
     protected function getData(): array
     {
-        $statuses = OrderStatus::where('is_active', true)->orderBy('sort_order')->get();
+        $filter = $this->filter;
 
-        $query = Order::selectRaw('status, COUNT(*) as count')->groupBy('status');
+        [$statuses, $counts] = cache()->remember("widget_orders_by_status_{$filter}", 60, function () use ($filter) {
+            $statuses = OrderStatus::where('is_active', true)->orderBy('sort_order')->get();
 
-        if ($this->filter && $this->filter !== 'all') {
-            $query->where('site_id', $this->filter);
-        }
+            $query = Order::selectRaw('status, COUNT(*) as count')->groupBy('status');
+            if ($filter && $filter !== 'all') {
+                $query->where('site_id', $filter);
+            }
 
-        $counts = $query->pluck('count', 'status');
+            return [$statuses, $query->pluck('count', 'status')];
+        });
 
         $labels = [];
         $data   = [];
