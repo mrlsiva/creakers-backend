@@ -20,16 +20,16 @@ class OrderController extends Controller
         $site = Site::where('slug', $siteSlug)->where('is_active', true)->firstOrFail();
 
         $validated = $request->validate([
-            'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'customer_email' => 'nullable|email|max:255',
-            'customer_address' => 'required|string',
-            'customer_city' => 'required|string|max:100',
+            'customer_name'    => 'required|string|max:255',
+            'customer_phone'   => 'required|string|max:20',
+            'customer_email'   => 'nullable|email|max:255',
+            'customer_address' => 'nullable|string',
+            'customer_city'    => 'nullable|string|max:100',
             'customer_district' => 'nullable|string|max:100',
-            'customer_state' => 'nullable|string|max:100',
-            'customer_pincode' => 'required|string|max:10',
-            'notes' => 'nullable|string',
-            'items' => 'required|array|min:1',
+            'customer_state'   => 'nullable|string|max:100',
+            'customer_pincode' => 'nullable|string|max:10',
+            'notes'            => 'nullable|string',
+            'items'            => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
@@ -116,9 +116,8 @@ class OrderController extends Controller
             'message' => 'Order placed successfully.',
             'data' => [
                 'order_number' => $order->order_number,
-                'total_amount' => (float) $order->total_amount,
-                'status' => $order->status,
-                'items_count' => $order->items->count(),
+                'status'       => $order->status,
+                'created_at'   => $order->created_at->toIso8601String(),
             ],
         ], 201);
     }
@@ -183,14 +182,16 @@ class OrderController extends Controller
                 'customer_pincode' => $order->customer_pincode,
                 'total_amount' => (float) $order->total_amount,
                 'notes' => $order->notes,
-                'created_at' => $order->created_at->format('d M Y, h:i A'),
+                'created_at' => $order->created_at->toIso8601String(),
                 'items' => $order->items->map(fn($item) => [
+                    'product_id'   => $item->product_id,
                     'product_name' => $item->product_name,
                     'category_name' => $item->category_name,
-                    'mrp' => (float) $item->mrp,
-                    'our_price' => (float) $item->our_price,
-                    'quantity' => $item->quantity,
-                    'subtotal' => (float) $item->subtotal,
+                    'mrp'          => (float) $item->mrp,
+                    'our_price'    => (float) $item->our_price,
+                    'price'        => (float) $item->our_price,
+                    'quantity'     => $item->quantity,
+                    'subtotal'     => (float) $item->subtotal,
                 ])->toArray(),
         ];
     }

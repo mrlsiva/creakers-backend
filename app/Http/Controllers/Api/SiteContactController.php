@@ -19,21 +19,25 @@ class SiteContactController extends Controller
             return response()->json(['success' => true, 'data' => null]);
         }
 
+        $phones = $contact->phones
+            ? array_values(array_filter(array_map('trim', explode(',', $contact->phones))))
+            : [];
+
         return response()->json([
             'success' => true,
             'data' => [
-                'address'      => $contact->address,
-                'phones'       => $contact->phones
-                    ? array_map('trim', explode(',', $contact->phones))
-                    : [],
+                'phone'        => $phones[0] ?? null,
+                'whatsapp'     => $contact->whatsapp ?: ($phones[0] ?? null),
                 'email'        => $contact->email,
+                'address'      => $contact->address,
                 'opening_time' => $contact->opening_time,
+                'map_embed_url' => $contact->map_embed_url,
                 'social_links' => collect($contact->social_links ?? [])->map(fn($item) => [
                     'label' => $item['label'] ?? null,
                     'url'   => $item['url'] ?? null,
                     'icon'  => isset($item['icon']) ? Storage::url($item['icon']) : null,
                 ])->values(),
-                'map_embed_url' => $contact->map_embed_url,
+                'phones'       => $phones,
             ],
         ]);
     }

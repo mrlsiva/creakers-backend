@@ -18,6 +18,10 @@ class CategoryController extends Controller
             : asset('images/default-product.svg');
 
         $categories = Category::where('is_active', true)
+            ->withCount(['products as products_count' => fn($q) => $q
+                ->where('is_active', true)
+                ->whereHas('prices', fn($q) => $q->where('site_id', $site->id))
+            ])
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get()
@@ -33,11 +37,12 @@ class CategoryController extends Controller
     private function formatCategory(Category $category, string $fallback): array
     {
         return [
-            'id'           => $category->id,
-            'name'         => $category->name,
-            'slug'         => $category->slug,
-            'image'        => $category->image ? asset('storage/' . $category->image) : $fallback,
-            'is_exclusive' => $category->is_exclusive,
+            'id'             => $category->id,
+            'name'           => $category->name,
+            'slug'           => $category->slug,
+            'image'          => $category->image ? asset('storage/' . $category->image) : $fallback,
+            'is_exclusive'   => $category->is_exclusive,
+            'products_count' => $category->products_count ?? 0,
         ];
     }
 }
