@@ -205,6 +205,9 @@ class ProductResource extends Resource
                                 ->numeric()
                                 ->default(0)
                                 ->minValue(0)
+                                ->maxValue(fn(callable $get) => $get('discount_type') === 'flat'
+                                    ? max(0, (float) ($get('mrp') ?: 0))
+                                    : 100)
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(fn($state, callable $get, callable $set) =>
                                     self::recalc((float) $get('mrp'), $get('discount_type'), (float) $state, $set))
@@ -251,6 +254,9 @@ class ProductResource extends Resource
                                 ->numeric()
                                 ->default(0)
                                 ->minValue(0)
+                                ->maxValue(fn(callable $get) => $get('discount_type') === 'flat'
+                                    ? max(0, (float) ($get('mrp') ?: 0))
+                                    : 100)
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(fn($state, callable $get, callable $set) =>
                                     self::recalc((float) $get('mrp'), $get('discount_type'), (float) $state, $set)),
