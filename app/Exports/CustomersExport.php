@@ -13,19 +13,22 @@ class CustomersExport implements FromQuery, WithHeadings, WithMapping, WithStyle
 {
     public function query()
     {
-        return Order::selectRaw('
-            MIN(id)               AS id,
-            customer_phone,
-            MAX(customer_name)    AS customer_name,
-            MAX(customer_email)   AS customer_email,
-            MAX(customer_city)    AS customer_city,
-            MAX(customer_pincode) AS customer_pincode,
-            COUNT(*)              AS orders_count,
-            SUM(total_amount)     AS total_spent,
-            MAX(created_at)       AS last_order_at
-        ')
-        ->groupBy('customer_phone')
-        ->orderByDesc('last_order_at');
+        return Order::query()
+            ->join('sites', 'sites.id', '=', 'orders.site_id')
+            ->selectRaw('
+                MIN(orders.id)               AS id,
+                orders.customer_phone,
+                sites.name                    AS site_name,
+                MAX(orders.customer_name)    AS customer_name,
+                MAX(orders.customer_email)   AS customer_email,
+                MAX(orders.customer_city)    AS customer_city,
+                MAX(orders.customer_pincode) AS customer_pincode,
+                COUNT(*)                     AS orders_count,
+                SUM(orders.total_amount)     AS total_spent,
+                MAX(orders.created_at)       AS last_order_at
+            ')
+            ->groupBy('orders.customer_phone', 'orders.site_id', 'sites.name')
+            ->orderByDesc('last_order_at');
     }
 
     public function headings(): array
@@ -34,6 +37,7 @@ class CustomersExport implements FromQuery, WithHeadings, WithMapping, WithStyle
             'S/N',
             'Name',
             'Phone',
+            'Site',
             'Email',
             'City',
             'Pincode',
@@ -52,6 +56,7 @@ class CustomersExport implements FromQuery, WithHeadings, WithMapping, WithStyle
             $index,
             $row->customer_name ?? '',
             $row->customer_phone,
+            $row->site_name ?? '',
             $row->customer_email ?? '',
             $row->customer_city ?? '',
             $row->customer_pincode ?? '',
