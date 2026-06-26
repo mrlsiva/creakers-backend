@@ -5,11 +5,13 @@ namespace App\Filament\Pages;
 use App\Exports\CustomersExport;
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\Site;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -42,18 +44,22 @@ class Customers extends Page implements HasTable
     {
         return $table
             ->query(
-                Order::selectRaw('
-                    MIN(id)              AS id,
-                    customer_phone,
-                    MAX(customer_name)   AS customer_name,
-                    MAX(customer_email)  AS customer_email,
-                    MAX(customer_city)   AS customer_city,
-                    MAX(customer_pincode) AS customer_pincode,
-                    COUNT(*)             AS orders_count,
-                    SUM(total_amount)    AS total_spent,
-                    MAX(created_at)      AS last_order_at
-                ')
-                ->groupBy('customer_phone')
+                Order::query()
+                    ->join('sites', 'sites.id', '=', 'orders.site_id')
+                    ->selectRaw('
+                        MIN(orders.id)              AS id,
+                        orders.customer_phone,
+                        orders.site_id,
+                        sites.name                  AS site_name,
+                        MAX(orders.customer_name)   AS customer_name,
+                        MAX(orders.customer_email)  AS customer_email,
+                        MAX(orders.customer_city)   AS customer_city,
+                        MAX(orders.customer_pincode) AS customer_pincode,
+                        COUNT(*)                    AS orders_count,
+                        SUM(orders.total_amount)    AS total_spent,
+                        MAX(orders.created_at)      AS last_order_at
+                    ')
+                    ->groupBy('orders.customer_phone', 'orders.site_id', 'sites.name')
             )
             ->columns([
                 TextColumn::make('index')
@@ -71,6 +77,14 @@ class Customers extends Page implements HasTable
                     ->searchable()
                     ->copyable()
                     ->copyMessage('Phone copied')
+                    ->toggleable(),
+
+                TextColumn::make('site_name')
+                    ->label('Site')
+                    ->badge()
+                    ->color('warning')
+                    ->searchable()
+                    ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('customer_email')
@@ -108,6 +122,11 @@ class Customers extends Page implements HasTable
                     ->toggleable(),
             ])
             ->defaultSort('last_order_at', 'desc')
+            ->filters([
+                SelectFilter::make('site_id')
+                    ->label('Site')
+                    ->options(Site::pluck('name', 'id')),
+            ])
             ->actions([
                 \Filament\Tables\Actions\Action::make('viewOrders')
                     ->label('Orders')
