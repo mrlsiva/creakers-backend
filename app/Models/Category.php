@@ -8,7 +8,9 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'image', 'sort_order', 'is_active', 'is_exclusive'];
+    protected $fillable = [
+        'name', 'slug', 'image', 'image_vigo', 'image_ghilli', 'sort_order', 'is_active', 'is_exclusive',
+    ];
 
     protected $casts = ['is_active' => 'boolean', 'is_exclusive' => 'boolean'];
 
@@ -24,5 +26,14 @@ class Category extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function imageForSite(Site $site): ?string
+    {
+        return match ($site->slug) {
+            'vigo'   => $this->image_vigo,
+            'ghilli' => $this->image_ghilli,
+            default  => null,
+        } ?: $this->image;
     }
 }

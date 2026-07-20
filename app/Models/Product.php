@@ -13,7 +13,7 @@ class Product extends Model
     use SoftDeletes;
     protected $fillable = [
         'category_id', 'name', 'slug', 'description', 'per',
-        'image', 'gallery', 'sort_order', 'is_active',
+        'image', 'image_vigo', 'image_ghilli', 'gallery', 'sort_order', 'is_active',
         'is_bestseller', 'badge_text',
     ];
 
@@ -45,6 +45,15 @@ class Product extends Model
     public function priceForSite(int $siteId): ?ProductPrice
     {
         return $this->prices()->where('site_id', $siteId)->first();
+    }
+
+    public function imageForSite(Site $site): ?string
+    {
+        return match ($site->slug) {
+            'vigo'   => $this->image_vigo,
+            'ghilli' => $this->image_ghilli,
+            default  => null,
+        } ?: $this->image;
     }
 
     public function orderItems(): HasMany

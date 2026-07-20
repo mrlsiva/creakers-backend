@@ -38,7 +38,7 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'site' => ['name' => $site->name, 'slug' => $site->slug],
-            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site->id, $fallback)),
+            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site, $fallback)),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -59,7 +59,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $this->formatProduct($product, $site->id, $this->fallbackImage($site)),
+            'data' => $this->formatProduct($product, $site, $this->fallbackImage($site)),
         ]);
     }
 
@@ -82,7 +82,7 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'category' => ['name' => $category->name, 'slug' => $category->slug],
-            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site->id, $fallback)),
+            'data' => $paginated->getCollection()->map(fn($p) => $this->formatProduct($p, $site, $fallback)),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -99,9 +99,10 @@ class ProductController extends Controller
             : asset('images/default-product.svg');
     }
 
-    private function formatProduct(Product $product, int $siteId, string $fallback): array
+    private function formatProduct(Product $product, Site $site, string $fallback): array
     {
         $price = $product->prices->first();
+        $image = $product->imageForSite($site);
 
         return [
             'id' => $product->id,
@@ -109,7 +110,7 @@ class ProductController extends Controller
             'slug' => $product->slug,
             'per' => $product->per,
             'description' => $product->description,
-            'image' => $product->image ? asset('storage/' . $product->image) : $fallback,
+            'image' => $image ? asset('storage/' . $image) : $fallback,
             'gallery' => collect($product->gallery ?? [])->map(fn($img) => asset('storage/' . $img)),
             'is_bestseller' => (bool) $product->is_bestseller,
             'badge_text' => $product->badge_text,

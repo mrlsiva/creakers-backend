@@ -45,6 +45,26 @@ class CategoryResource extends Resource
                 ->hint('Auto-generated from name. You can edit.'),
 
             FileUpload::make('image')
+                ->label('Default Image')
+                ->hint('Used for a site below if it has no image of its own')
+                ->image()
+                ->disk('public')
+                ->directory('categories')
+                ->imagePreviewHeight('80')
+                ->maxSize(2048)
+                ->columnSpanFull(),
+
+            FileUpload::make('image_vigo')
+                ->label('Vigo Crackers Image')
+                ->image()
+                ->disk('public')
+                ->directory('categories')
+                ->imagePreviewHeight('80')
+                ->maxSize(2048)
+                ->columnSpanFull(),
+
+            FileUpload::make('image_ghilli')
+                ->label('Ghilli Image')
                 ->image()
                 ->disk('public')
                 ->directory('categories')

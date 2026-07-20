@@ -25,7 +25,7 @@ class CategoryController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get()
-            ->map(fn($cat) => $this->formatCategory($cat, $fallback));
+            ->map(fn($cat) => $this->formatCategory($cat, $site, $fallback));
 
         return response()->json([
             'success' => true,
@@ -34,13 +34,15 @@ class CategoryController extends Controller
         ]);
     }
 
-    private function formatCategory(Category $category, string $fallback): array
+    private function formatCategory(Category $category, Site $site, string $fallback): array
     {
+        $image = $category->imageForSite($site);
+
         return [
             'id'             => $category->id,
             'name'           => $category->name,
             'slug'           => $category->slug,
-            'image'          => $category->image ? asset('storage/' . $category->image) : $fallback,
+            'image'          => $image ? asset('storage/' . $image) : $fallback,
             'is_exclusive'   => $category->is_exclusive,
             'products_count' => $category->products_count ?? 0,
         ];

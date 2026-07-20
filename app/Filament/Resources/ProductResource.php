@@ -155,6 +155,26 @@ class ProductResource extends Resource
                 ->columnSpan(2),
 
             FileUpload::make('image')
+                ->label('Default Image')
+                ->hint('Used for a site below if it has no image of its own')
+                ->image()
+                ->disk('public')
+                ->directory('products')
+                ->imagePreviewHeight('80')
+                ->maxSize(2048)
+                ->columnSpan(2),
+
+            FileUpload::make('image_vigo')
+                ->label('Vigo Crackers Image')
+                ->image()
+                ->disk('public')
+                ->directory('products')
+                ->imagePreviewHeight('80')
+                ->maxSize(2048)
+                ->columnSpan(2),
+
+            FileUpload::make('image_ghilli')
+                ->label('Ghilli Image')
                 ->image()
                 ->disk('public')
                 ->directory('products')
