@@ -67,6 +67,11 @@ class HomeBannerResource extends Resource
                     ->maxLength(255)
                     ->columnSpan(1),
 
+                TextInput::make('title2')
+                    ->label('Title 2')
+                    ->maxLength(255)
+                    ->columnSpan(1),
+
                 TextInput::make('second_title')
                     ->label('Second Title')
                     ->placeholder('e.g. Light Up Your Celebrations')
@@ -127,6 +132,10 @@ class HomeBannerResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('title')
+                    ->limit(40),
+
+                TextColumn::make('title2')
+                    ->label('Title 2')
                     ->limit(40),
 
                 TextColumn::make('second_title')

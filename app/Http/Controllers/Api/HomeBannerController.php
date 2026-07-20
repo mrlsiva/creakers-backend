@@ -25,6 +25,7 @@ class HomeBannerController extends Controller
                 'image'                 => $banner->image ? Storage::url($banner->image) : null,
                 'mobile_image'          => $banner->mobile_image ? Storage::url($banner->mobile_image) : null,
                 'title'                 => $banner->title,
+                'title2'                => $banner->title2,
                 'second_title'          => $banner->second_title,
                 'description'           => $banner->description,
                 'top_small_description' => $banner->top_small_description,

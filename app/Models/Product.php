@@ -14,11 +14,13 @@ class Product extends Model
     protected $fillable = [
         'category_id', 'name', 'slug', 'description', 'per',
         'image', 'gallery', 'sort_order', 'is_active',
+        'is_bestseller', 'badge_text',
     ];
 
     protected $casts = [
         'gallery' => 'array',
         'is_active' => 'boolean',
+        'is_bestseller' => 'boolean',
     ];
 
     protected static function booted(): void

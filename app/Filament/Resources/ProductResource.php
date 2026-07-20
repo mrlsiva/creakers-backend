@@ -135,6 +135,19 @@ class ProductResource extends Resource
                 ->hiddenOn('create')
                 ->columnSpan(1),
 
+            // Row 2b: Bestseller flag + badge text shown on the Home page "Best Sellers" section
+            Toggle::make('is_bestseller')
+                ->label('Show in Best Sellers')
+                ->helperText('Featured on the Home page "Best Sellers" section.')
+                ->default(false)
+                ->columnSpan(1),
+
+            TextInput::make('badge_text')
+                ->label('Badge Text')
+                ->placeholder('e.g. BESTSELLER, VALUE PACK — leave blank to show the discount % instead')
+                ->maxLength(30)
+                ->columnSpan(3),
+
             // Row 3: Description (2 cols) | Image (2 cols) — same height
             Textarea::make('description')
                 ->rows(3)
@@ -312,6 +325,10 @@ class ProductResource extends Resource
 
                 IconColumn::make('is_active')
                     ->label('Active')
+                    ->boolean(),
+
+                IconColumn::make('is_bestseller')
+                    ->label('Bestseller')
                     ->boolean(),
 
                 // Toggleable — hidden by default

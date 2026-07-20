@@ -27,6 +27,10 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
+        if ($request->boolean('bestseller')) {
+            $query->where('is_bestseller', true);
+        }
+
         $perPage = min((int) $request->input('per_page', 20), 100);
         $paginated = $query->orderBy('sort_order')->orderBy('name')->paginate($perPage);
         $fallback = $this->fallbackImage($site);
@@ -107,6 +111,8 @@ class ProductController extends Controller
             'description' => $product->description,
             'image' => $product->image ? asset('storage/' . $product->image) : $fallback,
             'gallery' => collect($product->gallery ?? [])->map(fn($img) => asset('storage/' . $img)),
+            'is_bestseller' => (bool) $product->is_bestseller,
+            'badge_text' => $product->badge_text,
             'category' => [
                 'id' => $product->category->id,
                 'name' => $product->category->name,

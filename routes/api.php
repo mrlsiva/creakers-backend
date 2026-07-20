@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\FrontendDocsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ClientLogoController;
+use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\FestivalOfferController;
 use App\Http\Controllers\Api\HomeBannerController;
 use App\Http\Controllers\Api\OrderStepController;
@@ -41,4 +42,5 @@ Route::prefix('{site}')->group(function () {
     Route::get('order-steps', [OrderStepController::class, 'index']);
     Route::get('safety-tips', [SafetyTipController::class, 'index']);
     Route::get('price-lists', [PriceListPdfController::class, 'index']);
+    Route::get('faqs', [FaqController::class, 'index']);
 });

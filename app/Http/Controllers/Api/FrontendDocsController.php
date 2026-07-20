@@ -292,6 +292,7 @@ class FrontendDocsController extends Controller
                         'data'    => [
                             'image'                 => 'https://example.com/banner.jpg',
                             'title'                 => 'Vigo Crackers',
+                            'title2'                => 'Premium Fireworks Store',
                             'second_title'          => 'Light Up Your Celebrations',
                             'description'           => 'Experience the finest selection of premium fireworks and crackers. Safe, certified, and delivered to your doorstep.',
                             'top_small_description' => 'Premium Quality Fireworks Since 1990',

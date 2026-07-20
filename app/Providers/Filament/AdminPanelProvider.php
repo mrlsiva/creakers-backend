@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\ClientLogoResource;
+use App\Filament\Resources\FaqResource;
 use App\Filament\Resources\FestivalOfferResource;
 use App\Filament\Resources\HomeBannerResource;
 use App\Filament\Resources\OrderStepResource;
@@ -71,6 +72,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Price List PDFs')
                     ->icon('heroicon-o-document-arrow-down')
                     ->url(fn() => PriceListPdfResource::getUrl()),
+                MenuItem::make()
+                    ->label('FAQs')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->url(fn() => FaqResource::getUrl()),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
