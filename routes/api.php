@@ -41,6 +41,6 @@ Route::prefix('{site}')->group(function () {
     Route::get('client-logos', [ClientLogoController::class, 'index']);
     Route::get('order-steps', [OrderStepController::class, 'index']);
     Route::get('safety-tips', [SafetyTipController::class, 'index']);
-    Route::get('price-lists', [PriceListPdfController::class, 'index']);
+    Route::get('price-list/download', [PriceListPdfController::class, 'download']);
     Route::get('faqs', [FaqController::class, 'index']);
 });

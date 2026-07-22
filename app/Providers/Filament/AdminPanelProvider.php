@@ -7,7 +7,6 @@ use App\Filament\Resources\FaqResource;
 use App\Filament\Resources\FestivalOfferResource;
 use App\Filament\Resources\HomeBannerResource;
 use App\Filament\Resources\OrderStepResource;
-use App\Filament\Resources\PriceListPdfResource;
 use App\Filament\Resources\SafetyTipResource;
 use App\Filament\Resources\SiteContactResource;
 use App\Filament\Resources\SiteContentResource;
@@ -68,10 +67,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Safety Tips')
                     ->icon('heroicon-o-shield-check')
                     ->url(fn() => SafetyTipResource::getUrl()),
-                MenuItem::make()
-                    ->label('Price List PDFs')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn() => PriceListPdfResource::getUrl()),
                 MenuItem::make()
                     ->label('FAQs')
                     ->icon('heroicon-o-question-mark-circle')
