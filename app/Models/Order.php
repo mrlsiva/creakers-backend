@@ -60,9 +60,16 @@ class Order extends Model
             Cache::forget('widget_orders_by_status_all');
         };
 
+        $clearSiteStatusCache = function (Order $order) {
+            Cache::forget("widget_orders_by_status_{$order->site_id}");
+        };
+
         static::created($clearDashboard);
         static::updated($clearDashboard);
         static::deleted($clearDashboard);
+        static::created($clearSiteStatusCache);
+        static::updated($clearSiteStatusCache);
+        static::deleted($clearSiteStatusCache);
     }
 
     public function site(): BelongsTo
