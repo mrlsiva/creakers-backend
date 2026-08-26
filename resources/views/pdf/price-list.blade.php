@@ -60,7 +60,6 @@
         table.items tbody tr:nth-child(even) { background: #fffdf5; }
         .mrp-strike { text-decoration: line-through; color: #aaa; }
         .our-price { font-weight: bold; color: #8b0000; }
-        .savings { color: #2e7d32; font-weight: bold; }
 
         /* ── Footer ── */
         .footer {
@@ -133,7 +132,6 @@
                     <th>M.R.P</th>
                     <th>Discount</th>
                     <th>Our Price</th>
-                    <th>You Save</th>
                 </tr>
             </thead>
             <tbody>
@@ -144,7 +142,6 @@
                             $discLabel = $price->discount_type === 'flat'
                                 ? '₹' . number_format($price->discount_value, 0)
                                 : number_format($price->discount_value, 0) . '%';
-                            $savings = $price->mrp - $price->our_price;
                         @endphp
                         <tr>
                             <td class="col-name">{{ $product->name }}</td>
@@ -152,7 +149,6 @@
                             <td><span class="mrp-strike">₹{{ number_format($price->mrp, 0) }}</span></td>
                             <td>{{ $discLabel }}</td>
                             <td class="our-price">₹{{ number_format($price->our_price, 0) }}</td>
-                            <td class="savings">₹{{ number_format($savings, 0) }}</td>
                         </tr>
                     @endif
                 @endforeach
