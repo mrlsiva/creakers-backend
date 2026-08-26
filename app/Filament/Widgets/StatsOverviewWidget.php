@@ -5,28 +5,35 @@ namespace App\Filament\Widgets;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Site;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverviewWidget extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?int $sort = 1;
     protected static ?string $pollingInterval = null;
 
     protected function getStats(): array
     {
+        $siteId = $this->filters['site_id'] ?? null;
+
         [$totalOrders, $todayOrders, $totalRevenue, $todayRevenue,
          $totalCustomers, $activeProducts, $activeSites, $pendingOrders] =
-            cache()->remember('dashboard_stats', 60, function () {
+            cache()->remember("dashboard_stats_" . ($siteId ?? 'all'), 60, function () use ($siteId) {
                 return [
-                    Order::count(),
-                    Order::whereDate('created_at', today())->count(),
-                    Order::sum('total_amount'),
-                    Order::whereDate('created_at', today())->sum('total_amount'),
-                    Order::distinct('customer_phone')->count('customer_phone'),
-                    Product::where('is_active', true)->count(),
+                    Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->count(),
+                    Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->whereDate('created_at', today())->count(),
+                    Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->sum('total_amount'),
+                    Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->whereDate('created_at', today())->sum('total_amount'),
+                    Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->distinct('customer_phone')->count('customer_phone'),
+                    Product::where('is_active', true)
+                        ->when($siteId, fn ($q) => $q->whereHas('prices', fn ($q) => $q->where('site_id', $siteId)))
+                        ->count(),
                     Site::where('is_active', true)->count(),
-                    Order::where('status', 'pending')->count(),
+                    Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->where('status', 'pending')->count(),
                 ];
             });
 

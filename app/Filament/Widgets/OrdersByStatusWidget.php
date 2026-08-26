@@ -4,38 +4,29 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use App\Models\OrderStatus;
-use App\Models\Site;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 class OrdersByStatusWidget extends ChartWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?string $heading = 'Orders by Status';
     protected static ?int $sort = 2;
     protected static ?string $maxHeight = '300px';
     protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 1;
 
-    public ?string $filter = 'all';
-
-    protected function getFilters(): ?array
-    {
-        $sites = cache()->remember('widget_sites_filter', 300, fn() =>
-            Site::where('is_active', true)->orderBy('name')->pluck('name', 'id')->toArray()
-        );
-
-        return ['all' => 'All Sites'] + $sites;
-    }
-
     protected function getData(): array
     {
-        $filter = $this->filter;
+        $siteId = $this->filters['site_id'] ?? null;
 
-        [$statuses, $counts] = cache()->remember("widget_orders_by_status_{$filter}", 60, function () use ($filter) {
+        [$statuses, $counts] = cache()->remember("widget_orders_by_status_" . ($siteId ?? 'all'), 60, function () use ($siteId) {
             $statuses = OrderStatus::where('is_active', true)->orderBy('sort_order')->get();
 
             $query = Order::selectRaw('status, COUNT(*) as count')->groupBy('status');
-            if ($filter && $filter !== 'all') {
-                $query->where('site_id', $filter);
+            if ($siteId) {
+                $query->where('site_id', $siteId);
             }
 
             return [$statuses, $query->pluck('count', 'status')];
