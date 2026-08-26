@@ -15,7 +15,7 @@ class LatestOrdersWidget extends BaseWidget
     use InteractsWithPageFilters;
 
     protected static ?string $heading = 'Latest Orders';
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 5;
     protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 'full';
 

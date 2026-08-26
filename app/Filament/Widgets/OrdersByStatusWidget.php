@@ -12,7 +12,7 @@ class OrdersByStatusWidget extends ChartWidget
     use InteractsWithPageFilters;
 
     protected static ?string $heading = 'Orders by Status';
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
     protected static ?string $maxHeight = '300px';
     protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 1;

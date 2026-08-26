@@ -21,8 +21,17 @@ class StatsOverviewWidget extends BaseWidget
         $siteId = $this->filters['site_id'] ?? null;
 
         [$totalOrders, $todayOrders, $totalRevenue, $todayRevenue,
-         $totalCustomers, $activeProducts, $activeSites, $pendingOrders] =
+         $totalCustomers, $activeProducts, $activeSites, $pendingOrders, $ordersTrend, $revenueTrend] =
             cache()->remember("dashboard_stats_" . ($siteId ?? 'all'), 60, function () use ($siteId) {
+                $days = collect(range(6, 0))->map(fn ($i) => now()->subDays($i)->toDateString());
+
+                $daily = Order::selectRaw('DATE(created_at) as day, COUNT(*) as orders, SUM(total_amount) as revenue')
+                    ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
+                    ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+                    ->groupBy('day')
+                    ->get()
+                    ->keyBy('day');
+
                 return [
                     Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->count(),
                     Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->whereDate('created_at', today())->count(),
@@ -34,38 +43,42 @@ class StatsOverviewWidget extends BaseWidget
                         ->count(),
                     Site::where('is_active', true)->count(),
                     Order::when($siteId, fn ($q) => $q->where('site_id', $siteId))->where('status', 'pending')->count(),
+                    $days->map(fn ($d) => (int) ($daily[$d]->orders ?? 0))->all(),
+                    $days->map(fn ($d) => (float) ($daily[$d]->revenue ?? 0))->all(),
                 ];
             });
 
         return [
             Stat::make('Total Orders', number_format($totalOrders))
                 ->description("Today: {$todayOrders} new")
-                ->icon('heroicon-o-shopping-cart')
+                ->descriptionIcon('heroicon-m-shopping-cart')
+                ->chart($ordersTrend)
                 ->color('info'),
 
             Stat::make('Total Revenue', '₹' . number_format($totalRevenue, 2))
                 ->description('Today: ₹' . number_format($todayRevenue, 2))
-                ->icon('heroicon-o-currency-rupee')
+                ->descriptionIcon('heroicon-m-currency-rupee')
+                ->chart($revenueTrend)
                 ->color('success'),
 
             Stat::make('Pending Orders', number_format($pendingOrders))
                 ->description('Awaiting action')
-                ->icon('heroicon-o-clock')
+                ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
 
             Stat::make('Customers', number_format($totalCustomers))
                 ->description('Unique customers')
-                ->icon('heroicon-o-users')
+                ->descriptionIcon('heroicon-m-users')
                 ->color('primary'),
 
             Stat::make('Active Products', number_format($activeProducts))
                 ->description('Listed products')
-                ->icon('heroicon-o-cube')
+                ->descriptionIcon('heroicon-m-cube')
                 ->color('info'),
 
             Stat::make('Active Sites', number_format($activeSites))
                 ->description('Running sites')
-                ->icon('heroicon-o-globe-alt')
+                ->descriptionIcon('heroicon-m-globe-alt')
                 ->color('success'),
         ];
     }
