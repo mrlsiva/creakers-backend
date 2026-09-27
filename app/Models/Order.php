@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Mail\CustomerOrderStatusUpdate;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class Order extends Model
 {
@@ -70,6 +73,21 @@ class Order extends Model
         static::created($clearSiteStatusCache);
         static::updated($clearSiteStatusCache);
         static::deleted($clearSiteStatusCache);
+
+        // Notify the customer whenever the order status changes
+        static::updated(function (Order $order) {
+            if (!$order->wasChanged('status') || !$order->customer_email) {
+                return;
+            }
+
+            try {
+                Mail::to($order->customer_email)->send(
+                    new CustomerOrderStatusUpdate($order->load('items', 'site'), $order->getOriginal('status'))
+                );
+            } catch (\Exception $e) {
+                Log::error('Customer order status update mail failed: ' . $e->getMessage());
+            }
+        });
     }
 
     public function site(): BelongsTo
