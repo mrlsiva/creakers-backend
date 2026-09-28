@@ -98,14 +98,14 @@ class OrderController extends Controller
 
         // Send emails
         try {
-            Mail::to($site->admin_email)->send(new AdminOrderNotification($order));
+            $site->mailer()->to($site->admin_email)->send(new AdminOrderNotification($order));
         } catch (\Exception $e) {
             \Log::error('Admin order notification failed: ' . $e->getMessage());
         }
 
         if ($order->customer_email) {
             try {
-                Mail::to($order->customer_email)->send(new CustomerOrderConfirmation($order));
+                $site->mailer()->to($order->customer_email)->send(new CustomerOrderConfirmation($order));
             } catch (\Exception $e) {
                 \Log::error('Customer order confirmation failed: ' . $e->getMessage());
             }

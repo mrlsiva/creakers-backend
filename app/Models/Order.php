@@ -81,7 +81,7 @@ class Order extends Model
             }
 
             try {
-                Mail::to($order->customer_email)->send(
+                $order->site->mailer()->to($order->customer_email)->send(
                     new CustomerOrderStatusUpdate($order->load('items', 'site'), $order->getOriginal('status'))
                 );
             } catch (\Exception $e) {
