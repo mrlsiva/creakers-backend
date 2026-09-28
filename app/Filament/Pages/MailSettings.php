@@ -84,6 +84,8 @@ class MailSettings extends Page implements HasForms
                             ->label('SMTP Password')
                             ->password()
                             ->revealable()
+                            // Stop the browser autofilling the admin login password here
+                            ->autocomplete('new-password')
                             ->placeholder(fn() => $this->currentSite()?->mail_password ? '•••••••• (saved)' : null)
                             ->helperText('For Gmail, use an App Password. Leave blank to keep the current password.'),
 
