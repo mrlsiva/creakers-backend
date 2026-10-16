@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Exports\OrdersExport;
+use App\Exports\OrdersPdf;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers\ItemsRelationManager;
 use App\Models\Order;
@@ -24,6 +25,7 @@ use Filament\Infolists\Infolist;
 use Illuminate\Support\HtmlString;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -336,36 +338,75 @@ class OrderResource extends Resource
             ->filtersFormColumns(2)
             ->actions([
                 ViewAction::make()
+                    ->iconButton()
                     ->icon('heroicon-o-eye')
                     ->tooltip('View'),
                 EditAction::make()
+                    ->iconButton()
                     ->icon('heroicon-s-pencil-square')
                     ->tooltip('Update Status'),
+                Action::make('download')
+                    ->iconButton()
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->tooltip('Download PDF')
+                    ->action(fn(Order $record) => OrdersPdf::download(
+                        Order::query()->whereKey($record->getKey()),
+                        true,
+                        'enquiry-' . $record->order_number . '.pdf'
+                    )),
             ])
             ->bulkActions([
                 BulkAction::make('download_selected')
                     ->label('Download selected')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Radio::make('format')
-                            ->label('What to include')
-                            ->options([
-                                'summary' => 'Order details only (one row per order)',
-                                'items'   => 'Order details with products (one row per product)',
-                            ])
-                            ->default('summary')
-                            ->required(),
-                    ])
-                    ->action(fn(Collection $records, array $data) => Excel::download(
-                        new OrdersExport(
-                            Order::query()->whereKey($records->modelKeys())->latest(),
-                            $data['format'] === 'items'
-                        ),
-                        'orders_' . now()->format('Y-m-d') . '.csv',
-                        \Maatwebsite\Excel\Excel::CSV
+                    ->form(static::downloadForm())
+                    ->action(fn(Collection $records, array $data) => static::downloadOrders(
+                        Order::query()->whereKey($records->modelKeys())->latest(),
+                        $data
                     ))
                     ->deselectRecordsAfterCompletion(),
             ]);
+    }
+
+    /** Options shown by every "download orders" action. */
+    public static function downloadForm(): array
+    {
+        return [
+            Radio::make('file_type')
+                ->label('File type')
+                ->options([
+                    'pdf' => 'PDF',
+                    'csv' => 'Excel (CSV)',
+                ])
+                ->default('pdf')
+                ->inline()
+                ->required(),
+            Radio::make('format')
+                ->label('What to include')
+                ->options([
+                    'summary' => 'Order details only (one row per order)',
+                    'items'   => 'Order details with products',
+                ])
+                ->default('summary')
+                ->required(),
+        ];
+    }
+
+    public static function downloadOrders(Builder $query, array $data)
+    {
+        $withItems = $data['format'] === 'items';
+        $filename  = 'orders_' . now()->format('Y-m-d');
+
+        if ($data['file_type'] === 'pdf') {
+            return OrdersPdf::download($query, $withItems, $filename . '.pdf');
+        }
+
+        return Excel::download(
+            new OrdersExport($query, $withItems),
+            $filename . '.csv',
+            \Maatwebsite\Excel\Excel::CSV
+        );
     }
 
     public static function getRelationManagers(): array

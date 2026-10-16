@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enquiry - {{ $order->order_number }}</title>
+    @php $orders = $orders ?? collect([$order]); @endphp
+    <title>Enquiry - {{ $orders->count() === 1 ? $orders->first()->order_number : $orders->count() . ' orders' }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -103,6 +104,9 @@
 </head>
 <body>
 
+@foreach($orders as $order)
+<div @if(! $loop->last) style="page-break-after: always;" @endif>
+
     {{-- Header --}}
     <table class="doc-header">
         <tr>
@@ -196,6 +200,9 @@
     <div class="footer-note">
         This is a computer-generated enquiry. Thank you for your order.
     </div>
+
+</div>
+@endforeach
 
 </body>
 </html>
