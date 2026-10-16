@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\OrdersExport;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers\ItemsRelationManager;
 use App\Models\Order;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -22,6 +24,7 @@ use Filament\Infolists\Infolist;
 use Illuminate\Support\HtmlString;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
@@ -30,6 +33,8 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderResource extends Resource
 {
@@ -285,6 +290,10 @@ class OrderResource extends Resource
                     ->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')
+            // Keep search/filters/sort when coming back from an order
+            ->persistSearchInSession()
+            ->persistFiltersInSession()
+            ->persistSortInSession()
             ->filters([
                 Filter::make('date_range')
                     ->label('Order Date')
@@ -332,7 +341,31 @@ class OrderResource extends Resource
                 EditAction::make()
                     ->icon('heroicon-s-pencil-square')
                     ->tooltip('Update Status'),
-            ]); 
+            ])
+            ->bulkActions([
+                BulkAction::make('download_selected')
+                    ->label('Download selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Radio::make('format')
+                            ->label('What to include')
+                            ->options([
+                                'summary' => 'Order details only (one row per order)',
+                                'items'   => 'Order details with products (one row per product)',
+                            ])
+                            ->default('summary')
+                            ->required(),
+                    ])
+                    ->action(fn(Collection $records, array $data) => Excel::download(
+                        new OrdersExport(
+                            Order::query()->whereKey($records->modelKeys())->latest(),
+                            $data['format'] === 'items'
+                        ),
+                        'orders_' . now()->format('Y-m-d') . '.csv',
+                        \Maatwebsite\Excel\Excel::CSV
+                    ))
+                    ->deselectRecordsAfterCompletion(),
+            ]);
     }
 
     public static function getRelationManagers(): array

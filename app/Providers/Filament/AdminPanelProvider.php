@@ -36,6 +36,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Navigate between pages without full browser reloads
+            ->spa()
             ->colors(['primary' => Color::Emerald])
             ->brandName('Creakers Admin')
             ->userMenuItems([
