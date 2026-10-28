@@ -54,6 +54,8 @@ class FrontendDocsController extends Controller
                             'slug'     => 'creakers',
                             'logo'     => 'https://example.com/logo.png',
                             'nav_icon' => 'https://example.com/nav-icon.png',
+                            'orders_enabled'        => true,
+                            'orders_closed_message' => null,
                         ],
                     ],
                 ],
@@ -176,7 +178,7 @@ class FrontendDocsController extends Controller
                     'group'       => 'Orders',
                     'method'      => 'POST',
                     'url'         => $base . '/{site}/orders',
-                    'description' => 'Place a new order',
+                    'description' => 'Place a new order. Returns 403 with { success: false, orders_enabled: false, message } when online orders are closed for the site.',
                     'auth'        => false,
                     'params'      => [
                         ['in' => 'path', 'name' => 'site', 'type' => 'string', 'required' => true, 'description' => 'Site slug'],

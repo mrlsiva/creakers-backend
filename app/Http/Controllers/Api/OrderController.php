@@ -19,6 +19,14 @@ class OrderController extends Controller
     {
         $site = Site::where('slug', $siteSlug)->where('is_active', true)->firstOrFail();
 
+        if (!$site->orders_enabled) {
+            return response()->json([
+                'success'        => false,
+                'orders_enabled' => false,
+                'message'        => $site->orders_closed_message ?: 'Online orders are currently closed.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'customer_name'    => 'required|string|max:255',
             'customer_phone'   => 'required|string|max:20',

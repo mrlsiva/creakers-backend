@@ -39,6 +39,8 @@ class SiteController extends Controller
                 'slug'     => $site->slug,
                 'logo'     => $site->logo ? asset('storage/' . $site->logo) : null,
                 'nav_icon' => $site->nav_icon ? asset('storage/' . $site->nav_icon) : null,
+                'orders_enabled'        => $site->orders_enabled,
+                'orders_closed_message' => $site->orders_enabled ? null : $site->orders_closed_message,
             ],
         ]);
     }
